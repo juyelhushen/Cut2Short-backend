@@ -4,6 +4,7 @@ import com.url.shortner.entity.Url;
 import com.url.shortner.repository.UrlRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,7 @@ public class UrlServiceImpl implements UrlService {
         //TODO
         return "";
     }
+
 
     @Override
     public String createUrl(String filteredUrl, String originalUrl) {
