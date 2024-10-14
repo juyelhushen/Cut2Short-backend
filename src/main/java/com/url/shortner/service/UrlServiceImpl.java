@@ -2,15 +2,20 @@ package com.url.shortner.service;
 
 import com.url.shortner.entity.Url;
 import com.url.shortner.repository.UrlRepository;
+import com.url.shortner.utils.HashGenerator;
+import com.url.shortner.utils.UrlUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Random;
+
+import static java.util.Base64.*;
 
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UrlServiceImpl implements UrlService {
 
     private final UrlRepository urlRepository;
@@ -32,5 +37,15 @@ public class UrlServiceImpl implements UrlService {
     public String createUrl(String filteredUrl, String originalUrl) {
         //TODO
         return "";
+    }
+
+    @Override
+    public String shortenUrl(String originalUrl) throws NoSuchAlgorithmException {
+        String shortenedUrl = HashGenerator.generateHash(originalUrl);
+
+    }
+
+    private String generateShortUrl() {
+        return getEncoder().encode();
     }
 }
