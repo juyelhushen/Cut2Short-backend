@@ -1,18 +1,18 @@
 package com.url.shortner.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class Url extends Auditable {
 
     @Id
@@ -20,5 +20,7 @@ public class Url extends Auditable {
     @SequenceGenerator(name = "url_seq", sequenceName = "url_sequence", allocationSize = 1)
     private int id;
     private String originalUrl;
-    private String shortUrl;
+    private String shortenUrl;
+
 }
+

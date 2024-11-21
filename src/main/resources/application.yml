@@ -37,3 +37,7 @@ logging:
     web: error
     root: info
     sql: error
+
+#url
+url:
+  prefix: jskool.jh/
