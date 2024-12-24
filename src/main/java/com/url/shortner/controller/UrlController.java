@@ -47,4 +47,5 @@ public class UrlController {
         response.sendRedirect(originalUrl);
         return ResponseEntity.status(HttpStatus.FOUND).build();
     }
+
 }
