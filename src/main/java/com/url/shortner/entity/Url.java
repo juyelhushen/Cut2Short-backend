@@ -22,5 +22,8 @@ public class Url extends Auditable {
     private String originalUrl;
     private String shortenUrl;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 }
 
