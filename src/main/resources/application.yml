@@ -7,7 +7,7 @@ spring:
 
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: jdbc:postgresql://localhost:5432/url
     password: postgres
     username: postgres
     driver-class-name: org.postgresql.Driver
@@ -20,12 +20,28 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+#        default_schema: url
 
   devtools:
     restart:
       enabled: true
     livereload:
       enabled: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${GIT_CLIENT_ID}
+            client-secret: ${GIT_CLIENT_SECRET}
+            scope:
+              - read:user
+              - user:email
+
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
 
 logging:
   #    file:
@@ -40,4 +56,9 @@ logging:
 
 #url
 url:
-  prefix: jskool.jh/
+  prefix: http://localhost:8080/c2s/
+
+
+#Secret Key
+Secret:
+  key: fkgnkvbkdfgrthgsfvfghjgnfdhguigndfjvkndffdkngdfkj

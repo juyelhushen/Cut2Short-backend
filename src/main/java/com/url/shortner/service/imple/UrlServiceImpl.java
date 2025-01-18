@@ -4,9 +4,9 @@ import com.url.shortner.entity.Url;
 import com.url.shortner.payload.UrlRequest;
 import com.url.shortner.repository.UrlRepository;
 import com.url.shortner.service.UrlService;
-import com.url.shortner.utils.HashGenerator;
 import com.url.shortner.wrapper.UrlResponse;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 
@@ -26,6 +27,7 @@ public class UrlServiceImpl implements UrlService {
     private String prefix;
 
     private final UrlRepository urlRepository;
+    private final ModelMapper modelMapper;
 
     @Override
     public List<UrlResponse> findAllUrl() {
@@ -56,7 +58,7 @@ public class UrlServiceImpl implements UrlService {
 
         while(true) {
             for (int i = 0; i < 6; i++) suffix.append(filteredUrl.charAt(new Random().nextInt(filteredUrl.length())));
-            res.append(prefix).append(suffix);
+            res.append(suffix);
             if (!urlSet.contains(res.toString())) break;
             else res = new StringBuilder();
         }
@@ -65,6 +67,7 @@ public class UrlServiceImpl implements UrlService {
                 .originalUrl(originalUrl)
                 .shortenUrl(res.toString())
                 .build();
+
 
         urlRepository.save(url);
         return new UrlResponse(url);
@@ -87,9 +90,11 @@ public class UrlServiceImpl implements UrlService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public String getOriginalUrl(String shortUrl) {
-        Url url = urlRepository.findByShortenUrl(shortUrl)
-                .orElseThrow(() -> new RuntimeException("Url not found"));
-        return url.getOriginalUrl();
+    public CompletableFuture<String> getOriginalUrl(String shortUrl) {
+        return CompletableFuture.supplyAsync(() -> {
+            Url url = urlRepository.findByShortenUrl(shortUrl)
+                    .orElseThrow(() -> new RuntimeException("Url not found"));
+            return url.getOriginalUrl();
+        });
     }
 }
