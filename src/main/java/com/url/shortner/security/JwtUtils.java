@@ -8,6 +8,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -19,6 +20,8 @@ import java.util.function.Function;
 @Service
 public class JwtUtils {
 
+
+    private final long JWT_EXPIRATION_MS = 86400000;   // 24 hours
     @Value("${Secret.key}")
     private String secretKey;
 
@@ -31,24 +34,34 @@ public class JwtUtils {
         return claimResolver.apply(claims);
     }
 
+    //standard login
     public String generate(int userId, String username, Role role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userid",userId);
         claims.put("username", username);
         claims.put("role", role);
-        return doGenerateToken(claims,username, role);
+        return doGenerateToken(claims,username);
+    }
+
+
+    //OauthLogin
+    public String generateFromOAuth2User(OAuth2User oAuth2User, Role role) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("email", oAuth2User.getAttribute("email"));
+        claims.put("name", oAuth2User.getAttribute("name"));
+        claims.put("role", role);
+        return doGenerateToken(claims, oAuth2User.getAttribute("email"));
     }
 
     private String doGenerateToken(Map<String, Object> claims,
-                                   String username,
-                                   Role role) {
+                                   String username) {
         return Jwts
                 .builder()
                 .claims(claims)
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
-                .claim("authorities", role)
+                .expiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION_MS ))
+//                .claim("authorities", role)
                 .signWith(getSignInKey())
                 .compact();
     };
@@ -73,6 +86,8 @@ public class JwtUtils {
                 .parseSignedClaims(token)
                 .getPayload();
     }
+
+
 
     private SecretKey getSignInKey() {
         byte[] keyInBites = Decoders.BASE64.decode(secretKey);

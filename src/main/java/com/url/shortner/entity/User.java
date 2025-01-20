@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.List;
@@ -23,17 +24,16 @@ public class User extends Auditable {
     @SequenceGenerator(name = "user_seq", sequenceName = "user_sequence", allocationSize = 1)
     private int id;
 
-    @NotNull
     private String firstName;
 
     private String lastName;
 
-    private String username;
 
 //    @NotNull
 //    @Email(message = "please enter correct email", regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
     private String email;
 
+    @Size(min = 10, max = 10)
     private String phoneNumber;
 
     @NotNull

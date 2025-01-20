@@ -35,6 +35,7 @@ spring:
           github:
             client-id: ${GIT_CLIENT_ID}
             client-secret: ${GIT_CLIENT_SECRET}
+            redirect-uri: "{baseUrl}/login/oauth2/code/github"
             scope:
               - read:user
               - user:email
@@ -42,6 +43,17 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: "{baseUrl}/login/oauth2/code/google"
+            scope: profile, email
+        provider:
+          google:
+            authorization-uri:  https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+          github:
+            authorization-uri: https://github.com/login/oauth/authorize
+            token-uri: https://github.com/login/oauth/access_token
+            user-info-uri: https://api.github.com/user
 
 logging:
   #    file:

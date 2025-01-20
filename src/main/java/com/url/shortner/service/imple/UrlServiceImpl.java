@@ -49,6 +49,9 @@ public class UrlServiceImpl implements UrlService {
     @Override
     public UrlResponse createUrl(String filteredUrl, String originalUrl) {
 
+        Optional<Url> url = urlRepository.findByOriginalUrl(originalUrl);
+        if (url.isPresent()) return new UrlResponse(url.get());
+
         Set<String> urlSet = urlRepository.findAll().stream()
                 .map(Url::getShortenUrl)
                 .collect(Collectors.toSet());
@@ -63,30 +66,16 @@ public class UrlServiceImpl implements UrlService {
             else res = new StringBuilder();
         }
 
-        Url url = Url.builder()
+        Url newUrl = Url.builder()
                 .originalUrl(originalUrl)
                 .shortenUrl(res.toString())
                 .build();
 
 
-        urlRepository.save(url);
-        return new UrlResponse(url);
+        urlRepository.save(newUrl);
+        return new UrlResponse(newUrl);
     }
 
-//    @Override
-//    public String shortenUrl(UrlRequest request) throws NoSuchAlgorithmException {
-//        Optional<Url> exitingUrl = urlRepository.findByOriginalUrl(request.originalUrl());
-//        if (exitingUrl.isPresent()) {
-//            return exitingUrl.get().getShortUrl();
-//        }
-//
-//        String shortenedUrl = HashGenerator.generateHash(request.originalUrl());
-//        Url newUrl = new Url();
-//        newUrl.setOriginalUrl(request.originalUrl());
-//        newUrl.setShortUrl(shortenedUrl);
-//        urlRepository.save(newUrl);
-//        return newUrl.getShortUrl();
-//    }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)

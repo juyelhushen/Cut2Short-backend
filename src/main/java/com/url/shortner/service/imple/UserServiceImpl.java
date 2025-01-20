@@ -38,15 +38,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public AuthResponse register(UserRequest request) {
         if (isValid(request)) {
-            Optional<User> user = userRepository.findByUsername(request.username());
-            if (user.isPresent()) throw new IllegalArgumentException("username already in use");
+            Optional<User> user = userRepository.findByEmail(request.email());
+            if (user.isPresent()) throw new IllegalArgumentException("email already in use");
             User savedUser = userRepository.save(saveUser(request));
 
-            Authentication auth = new UsernamePasswordAuthenticationToken(request.username(), request.password());
+            Authentication auth = new UsernamePasswordAuthenticationToken(request.email(), request.password());
             SecurityContextHolder.getContext().setAuthentication(auth);
 
-            String token = jwtUtils.generate(savedUser.getId(), savedUser.getUsername(), Role.USER);
-            return new AuthResponse(savedUser.getFullName(), savedUser.getUsername(), token);
+            String token = jwtUtils.generate(savedUser.getId(), savedUser.getEmail(), Role.USER);
+            return new AuthResponse(savedUser.getFullName(), savedUser.getEmail(), token);
 
         }
         return null;
@@ -54,24 +54,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public AuthResponse login(UserRequest request) {
-        log.info("checking username {}", request.username());
+        log.info("checking username {}", request.email());
         try {
             Authentication auth = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.username(), request.password())
+                    new UsernamePasswordAuthenticationToken(request.email(), request.password())
             );
 
             log.info("is authenticated value : {}", auth.isAuthenticated());
             if (auth.isAuthenticated()) {
-                User user = findByUsername(request.username());
+                User user = findByUsername(request.email());
                 SecurityContextHolder.getContext().setAuthentication(auth);
-                String token = jwtUtils.generate(user.getId(), user.getUsername(), Role.USER);
-                return new AuthResponse(user.getFullName(), user.getUsername(), token);
+                String token = jwtUtils.generate(user.getId(), user.getEmail(), Role.USER);
+                return new AuthResponse(user.getFullName(), user.getEmail(), token);
             }
 
             return null;
 
         } catch (BadCredentialsException e) {
-            throw new BadCredentialsException("Bad credentials! Invalid username or password!");
+            throw new BadCredentialsException("Bad credentials! Invalid email or password!");
         }
     }
 
@@ -79,18 +79,18 @@ public class UserServiceImpl implements UserService {
         return User.builder()
                 .firstName(userRequest.firstName())
                 .lastName(userRequest.lastName())
-                .username(userRequest.username())
+                .email(userRequest.email())
                 .password(passwordEncoder.encode(userRequest.password()))
                 .role(Role.USER)
                 .build();
     }
 
     private User findByUsername(String username) {
-        return userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        return userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException(username));
     }
 
 
     private boolean isValid(UserRequest request) {
-        return request.firstName() != null && request.username() != null && request.password() != null;
+        return request.firstName() != null && request.email() != null && request.password() != null;
     }
 }

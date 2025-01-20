@@ -1,7 +1,9 @@
 package com.url.shortner.config;
 
+import com.url.shortner.entity.Role;
 import com.url.shortner.security.AuthEntryPoint;
 import com.url.shortner.security.AuthFilter;
+import com.url.shortner.security.JwtUtils;
 import com.url.shortner.security.user.UserDetailServiceImpl;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -22,6 +24,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -37,7 +40,7 @@ public class SecurityConfiguration {
 
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtUtils jwtUtils) throws Exception {
         return http
                 .cors(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
@@ -45,13 +48,20 @@ public class SecurityConfiguration {
                         request
                                 .requestMatchers("/api/user/login", "/api/user/register").permitAll()
                                 .requestMatchers(AUTH_WHITELIST).permitAll()
-                                .anyRequest().permitAll()
+                                .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex ->ex.authenticationEntryPoint(authEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
-                .oauth2Login(oauth2 -> oauth2.defaultSuccessUrl("http://localhost:5173/dashboard", true))
+                .oauth2Login(oauth2 -> oauth2
+                        .defaultSuccessUrl("http://localhost:5173/dashboard", true)
+                        .successHandler((request, response, authentication) -> {
+                            OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+                            String token = jwtUtils.generateFromOAuth2User(oAuth2User, Role.USER);
+                            response.setHeader("Authorization", "Bearer " + token);
+                        })
+                )
                 .build();
     }
 
