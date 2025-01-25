@@ -1,6 +1,7 @@
 package com.url.shortner.controller;
 
 import com.url.shortner.payload.UserRequest;
+import com.url.shortner.security.user.CustomOAuth2UserService;
 import com.url.shortner.service.UserService;
 import com.url.shortner.utils.APIResponse;
 import com.url.shortner.utils.Constant;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,11 +23,6 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
-
-    @GetMapping("/info")
-    public Map<String, Object> info(@AuthenticationPrincipal OAuth2User principal) {
-        return principal.getAttributes();
-    }
 
     @PostMapping("/register")
     public ResponseEntity<APIResponse> register(@RequestBody UserRequest request) {
@@ -40,6 +37,4 @@ public class UserController {
         APIResponse apiResponse = new APIResponse(true, Constant.LOGIN_SUCCESS, HttpStatus.OK.value(), response);
         return ResponseEntity.ok(apiResponse);
     }
-
-
 }

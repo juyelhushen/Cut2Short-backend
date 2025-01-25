@@ -45,14 +45,19 @@ public class JwtUtils {
 
 
     //OauthLogin
-    public String generateFromOAuth2User(OAuth2User oAuth2User, Role role) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("email", oAuth2User.getAttribute("email"));
-        claims.put("name", oAuth2User.getAttribute("name"));
-        claims.put("role", role);
-        return doGenerateToken(claims, oAuth2User.getAttribute("email"));
-    }
 
+    public String generateFromOAuth2User(String username, Role role) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", role);
+        return doGenerateToken(claims, username);
+    }
+//    public String generateFromOAuth2User(OAuth2User oAuth2User, Role role) {
+//        Map<String, Object> claims = new HashMap<>();
+//        claims.put("email", oAuth2User.getAttribute("email"));
+//        claims.put("name", oAuth2User.getAttribute("name"));
+//        claims.put("role", role);
+//        return doGenerateToken(claims, oAuth2User.getAttribute("email"));
+//    }
     private String doGenerateToken(Map<String, Object> claims,
                                    String username) {
         return Jwts
@@ -93,4 +98,6 @@ public class JwtUtils {
         byte[] keyInBites = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyInBites);
     }
+
+
 }
