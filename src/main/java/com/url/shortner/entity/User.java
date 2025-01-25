@@ -36,7 +36,7 @@ public class User extends Auditable {
     @Size(min = 10, max = 10)
     private String phoneNumber;
 
-    @NotNull
+//    @NotNull
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
