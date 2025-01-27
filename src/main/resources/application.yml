@@ -14,12 +14,21 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+
     show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-#        default_schema: url
+        cache:
+          use_second_level_cache: true
+          region:
+            factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
+      javax:
+        cache:
+          provider: org.ehcache.jsr107.EhcacheCachingProvider
+
+  #        default_schema: url
 
   devtools:
     restart:
@@ -65,6 +74,10 @@ logging:
     web: error
     root: info
     sql: error
+    org:
+      hibernate:
+        cache:
+          spi: debug
 
 #url
 url:

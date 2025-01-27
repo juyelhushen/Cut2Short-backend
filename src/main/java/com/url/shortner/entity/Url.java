@@ -2,17 +2,18 @@ package com.url.shortner.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Table
+@Table(name = "url",schema = "public",indexes = {@Index(name = "shortenUrlIdx",columnList = "shortenUrl")})
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE,
+        region = "urlDetailsCache")
 public class Url extends Auditable {
 
     @Id
