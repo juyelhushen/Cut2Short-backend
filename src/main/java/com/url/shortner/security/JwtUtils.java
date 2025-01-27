@@ -92,8 +92,6 @@ public class JwtUtils {
                 .getPayload();
     }
 
-
-
     private SecretKey getSignInKey() {
         byte[] keyInBites = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyInBites);
