@@ -3,6 +3,7 @@ package com.url.shortner.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import java.time.Instant;
 
 
 @Entity
@@ -22,6 +23,9 @@ public class Url extends Auditable {
     private int id;
     private String originalUrl;
     private String shortenUrl;
+    private String title;
+    private String suffix;
+    private Instant expires;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

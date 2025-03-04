@@ -2,8 +2,11 @@
          xsi:noNameSpaceSchemaLocation="http://www.ehcache.org/ehcache.xsd" version="1.0" encoding="">
     <cache
             alias="userDetailsCache"
-            maxElementsInMemory="100"
-            timeToLiveSeconds="60"
+            maxElementsInMemory="1000"
+            timeToLiveSeconds="600"
+            timeToIdleSeconds="300"
+            overflowToDisk="false"
+            eternal="false"
             evictionStrategy="FIFO"
     />
     <cache
