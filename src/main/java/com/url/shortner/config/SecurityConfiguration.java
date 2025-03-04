@@ -62,7 +62,7 @@ public class SecurityConfiguration {
                 .authenticationProvider(authenticationProvider())
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                        .defaultSuccessUrl("http://localhost:5173/oauth2/callback", true)
+                        .defaultSuccessUrl("http://localhost:3000/oauth2/callback", true)
                         // Backend callback URL
                 )
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
@@ -101,7 +101,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("http://localhost:5173");
+        configuration.addAllowedOrigin("http://localhost:3000");
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
