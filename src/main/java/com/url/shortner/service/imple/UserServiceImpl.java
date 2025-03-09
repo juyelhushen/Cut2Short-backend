@@ -1,5 +1,6 @@
 package com.url.shortner.service.imple;
 
+import com.url.shortner.entity.Role;
 import com.url.shortner.entity.User;
 import com.url.shortner.payload.UserRequest;
 import com.url.shortner.repository.UserRepository;
