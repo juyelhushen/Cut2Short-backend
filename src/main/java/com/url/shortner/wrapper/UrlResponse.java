@@ -2,11 +2,9 @@ package com.url.shortner.wrapper;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.url.shortner.entity.Url;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.List;
 
 public record UrlResponse(int id, String originalUrl, String shortenUrl,
                           @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
