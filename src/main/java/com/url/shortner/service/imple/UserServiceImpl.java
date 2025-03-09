@@ -1,6 +1,5 @@
 package com.url.shortner.service.imple;
 
-import com.url.shortner.entity.Role;
 import com.url.shortner.entity.User;
 import com.url.shortner.payload.UserRequest;
 import com.url.shortner.repository.UserRepository;
@@ -15,7 +14,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;

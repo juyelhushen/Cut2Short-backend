@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -66,10 +65,9 @@ public class UrlServiceImpl implements UrlService {
             else res = new StringBuilder();
         }
 
-        Url newUrl = Url.builder()
-                .originalUrl(originalUrl)
-                .shortenUrl(res.toString())
-                .build();
+        Url newUrl = new Url();
+        newUrl.setOriginalUrl(originalUrl);
+        newUrl.setShortenUrl(res.toString());
 
 
         urlRepository.save(newUrl);

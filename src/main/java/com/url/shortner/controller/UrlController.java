@@ -43,5 +43,4 @@ public class UrlController {
             throw new RuntimeException(e.getMessage());
         }
     };
-
 }

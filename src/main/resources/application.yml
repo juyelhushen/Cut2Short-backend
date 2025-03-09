@@ -28,8 +28,7 @@ spring:
       javax:
         cache:
           provider: org.ehcache.jsr107.EhcacheCachingProvider
-
-  #        default_schema: url
+#          default_schema: url
 
   devtools:
     restart:
@@ -64,6 +63,11 @@ spring:
             authorization-uri: https://github.com/login/oauth/authorize
             token-uri: https://github.com/login/oauth/access_token
             user-info-uri: https://api.github.com/user
+
+  mail:
+    username: ${USERNAME}
+  sendgrid:
+    api-key: ${API_KEY}
 
 logging:
   #    file:
