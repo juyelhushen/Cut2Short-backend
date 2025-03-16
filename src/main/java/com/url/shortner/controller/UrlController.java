@@ -31,6 +31,20 @@ public class UrlController {
         return ResponseEntity.ok(responses);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PostMapping("/shorten/set")
+    public ResponseEntity<APIResponse> createUrl(@RequestBody UrlRequest request) {
+        try {
+            var filterUrl = urlService.filterUrl(request);
+            var response = urlService.createUrlForUser(filterUrl, request);
+            var apiResponse = new APIResponse(true, Constant.DATA_FETCH_SUCCESS, HttpStatus.OK.value(), response);
+            return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+
     @PostMapping("/shorten")
     public ResponseEntity<APIResponse> createdUrl(@RequestBody UrlRequest request) {
         try {

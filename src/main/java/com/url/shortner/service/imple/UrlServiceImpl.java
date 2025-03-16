@@ -4,6 +4,7 @@ import com.url.shortner.entity.Url;
 import com.url.shortner.entity.User;
 import com.url.shortner.exception.ResourceNotFound;
 import com.url.shortner.payload.UrlRequest;
+import com.url.shortner.payload.UserRequest;
 import com.url.shortner.repository.UrlRepository;
 import com.url.shortner.repository.UserRepository;
 import com.url.shortner.service.UrlService;
@@ -16,8 +17,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -50,6 +54,37 @@ public class UrlServiceImpl implements UrlService {
 
 
     @Override
+    public UrlResponse createUrlForUser(String filteredUrl, UrlRequest request) {
+        Optional<Url> url = urlRepository.findByOriginalUrl(request.originalUrl());
+        if (url.isPresent()) return new UrlResponse(url.get());
+
+        Set<String> urlSet = urlRepository.findAll().stream()
+                .map(Url::getShortenUrl)
+                .collect(Collectors.toSet());
+
+        StringBuilder res = new StringBuilder();
+        StringBuilder suffix = new StringBuilder();
+
+        while (true) {
+            for (int i = 0; i < 6; i++) suffix.append(filteredUrl.charAt(new Random().nextInt(filteredUrl.length())));
+            res.append(suffix);
+            if (!urlSet.contains(res.toString())) break;
+            else res = new StringBuilder();
+        }
+
+        Url newUrl = new Url();
+        newUrl.setOriginalUrl(request.originalUrl());
+        newUrl.setShortenUrl(res.toString());
+
+        var user = findByUserId(request.userId());
+        newUrl.setUser(user);
+        newUrl.setTitle(request.title());
+        newUrl.setExpires(Instant.now().plus(1, ChronoUnit.YEARS));
+        Url save = urlRepository.save(newUrl);
+        return new UrlResponse(save);
+    }
+
+    @Override
     public UrlResponse createUrl(String filteredUrl, String originalUrl) {
 
         Optional<Url> url = urlRepository.findByOriginalUrl(originalUrl);
@@ -74,8 +109,8 @@ public class UrlServiceImpl implements UrlService {
         newUrl.setShortenUrl(res.toString());
 
 
-        urlRepository.save(newUrl);
-        return new UrlResponse(newUrl);
+        var save = urlRepository.save(newUrl);
+        return new UrlResponse(save);
     }
 
 
