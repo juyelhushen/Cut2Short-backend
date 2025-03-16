@@ -55,7 +55,7 @@ public class SecurityConfiguration {
                         request
                                 .requestMatchers("/api/user/login","/api/user/register", "/oauth2/**").permitAll()
                                 .requestMatchers(AUTH_WHITELIST).permitAll()
-                                .anyRequest().authenticated()
+                                .anyRequest().permitAll()
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))

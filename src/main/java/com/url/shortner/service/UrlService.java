@@ -17,4 +17,9 @@ public interface UrlService {
     //    public String shortenUrl(UrlRequest request) throws NoSuchAlgorithmException;
     CompletableFuture<String> getOriginalUrl(String shortUrl);
 
+    List<UrlResponse> findAllUrlByUserId(int userId);
+
+    boolean deleteUrlById(int id);
+
+    UrlResponse updateUrl(UrlRequest request);
 }

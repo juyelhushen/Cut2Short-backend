@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -20,4 +21,7 @@ public interface UrlRepository extends JpaRepository<Url, Integer> {
     @Query("SELECT U FROM Url U WHERE U.originalUrl = :originalUrl")
     @QueryHints(@QueryHint(name = "org.hibernate.cacheable", value = "true"))
     Optional<Url> findByOriginalUrl(@Param("originalUrl") String originalUrl);
+
+    List<Url> findUrlsByUserId(int userId);
+
 }
