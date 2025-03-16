@@ -32,11 +32,12 @@ public class OAuthController {
             email = principal.getAttribute("login") + "@github.com";
         }
 
+        int userId = principal.getAttribute("userid");
         String name = principal.getAttribute("name");
         var token = principal.getAttribute("token");
         assert token != null;
 
-        AuthResponse auth = new AuthResponse(name,email,token.toString());
+        AuthResponse auth = new AuthResponse(userId, name,email,token.toString());
         APIResponse response = new APIResponse(true, Constant.LOGIN_SUCCESS,HttpStatus.CREATED.value(), auth);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
