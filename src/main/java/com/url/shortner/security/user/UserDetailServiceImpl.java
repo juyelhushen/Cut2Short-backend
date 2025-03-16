@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @Service
@@ -25,15 +24,20 @@ public class UserDetailServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.info("Inside loadUserByUsername method");
+        log.info("Inside loadUserByUsername method for user: {}", username);
+
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
 
-        if (Objects.nonNull(user)) {
-            GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole().name());
-            List<GrantedAuthority> authorities = Collections.singletonList(authority);
-            return new org.springframework.security.core.userdetails.User(
-                    user.getEmail(), user.getPassword(), authorities);
-        } else throw new UsernameNotFoundException("User not found" + username);
+        log.info("User found: {} | Role: {}", user.getEmail(), user.getRole());
+
+        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole().name());
+        List<GrantedAuthority> authorities = Collections.singletonList(authority);
+
+        String password = user.getPassword() != null ? user.getPassword() : "{noop}oauth_user";
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(), password, authorities);
     }
 }
+
