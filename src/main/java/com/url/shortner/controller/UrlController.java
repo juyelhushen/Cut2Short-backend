@@ -31,16 +31,59 @@ public class UrlController {
         return ResponseEntity.ok(responses);
     }
 
-    @PostMapping("/shorten")
-    public ResponseEntity<APIResponse> createdUrl(@RequestBody UrlRequest request) {
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PostMapping("/shorten/set")
+    public ResponseEntity<APIResponse> createUrl(@RequestBody UrlRequest request) {
         try {
-            String filterUrl =  urlService.filterUrl(request);
-            UrlResponse response = urlService.createUrl(filterUrl, request.originalUrl());
-            log.info("filter url is - ", filterUrl);
-            APIResponse apiResponse = new APIResponse(true, Constant.DATA_FETCH_SUCCESS,HttpStatus.OK.value(),response);
+            var filterUrl = urlService.filterUrl(request);
+            var response = urlService.createUrlForUser(filterUrl, request);
+            var apiResponse = new APIResponse(true, Constant.DATA_FETCH_SUCCESS, HttpStatus.OK.value(), response);
             return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
-    };
+    }
+
+
+    @PostMapping("/shorten")
+    public ResponseEntity<APIResponse> createdUrl(@RequestBody UrlRequest request) {
+        try {
+            var filterUrl = urlService.filterUrl(request);
+            var response = urlService.createUrl(filterUrl, request.originalUrl());
+            var apiResponse = new APIResponse(true, Constant.DATA_FETCH_SUCCESS, HttpStatus.OK.value(), response);
+            return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    ;
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<APIResponse> getUrlById(@PathVariable int userId) {
+        try {
+            var response = urlService.findAllUrlByUserId(userId);
+            var apiResponse = new APIResponse(true, Constant.DATA_FETCH_SUCCESS, HttpStatus.OK.value(), response);
+            return ResponseEntity.ok(apiResponse);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<APIResponse> deleteUrl(@PathVariable int id) {
+        var response = urlService.deleteUrlById(id);
+        APIResponse apiResponse;
+        if (response) {
+            apiResponse = new APIResponse(true, Constant.DATA_DELETED_SUCCESSFULLY, HttpStatus.OK.value(), null);
+        } else apiResponse = new APIResponse(false, Constant.FAILED_TO_DELETED, HttpStatus.OK.value(), null);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    @PatchMapping("/update")
+    public ResponseEntity<APIResponse> updateUrl(@RequestBody UrlRequest request) {
+        var response = urlService.updateUrl(request);
+        var apiResponse = new APIResponse(true, Constant.DATA_UPDATE_SUCCESS, HttpStatus.OK.value(), response);
+        return ResponseEntity.ok(apiResponse);
+    }
 }
