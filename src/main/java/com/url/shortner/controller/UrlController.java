@@ -57,9 +57,7 @@ public class UrlController {
         }
     }
 
-    ;
-
-    @GetMapping("/{userId}")
+    @GetMapping("/get/{userId}")
     public ResponseEntity<APIResponse> getUrlById(@PathVariable int userId) {
         try {
             var response = urlService.findAllUrlByUserId(userId);

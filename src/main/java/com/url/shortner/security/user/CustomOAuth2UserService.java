@@ -56,6 +56,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
         attributes.put("token", token);
+        attributes.put("userid", user.getId());
 
         String principalAttribute = oAuth2User.getAttribute("email") != null ? "email" : "login";
 

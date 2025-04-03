@@ -13,11 +13,14 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -76,10 +79,10 @@ public class UrlServiceImpl implements UrlService {
         newUrl.setOriginalUrl(request.originalUrl());
         newUrl.setShortenUrl(res.toString());
 
-        var user = findByUserId(request.userId());
+        var user = findByUsername(request.email());
         newUrl.setUser(user);
         newUrl.setTitle(request.title());
-        newUrl.setExpires(Instant.now().plus(1, ChronoUnit.YEARS));
+        newUrl.setExpires(LocalDate.now().plusYears(1));
         Url save = urlRepository.save(newUrl);
         return new UrlResponse(save);
     }
@@ -126,8 +129,8 @@ public class UrlServiceImpl implements UrlService {
 
 
     @Override
-    public List<UrlResponse> findAllUrlByUserId(int userId) {
-        var urlListByUserId = urlRepository.findUrlsByUserId(userId);
+    public List<UrlResponse> findAllUrlByUserId(int userid) {
+        var urlListByUserId = urlRepository.findUrlsByUserId(userid);
         return urlListByUserId.stream().map(UrlResponse::new).toList();
     }
 
@@ -152,8 +155,9 @@ public class UrlServiceImpl implements UrlService {
         return urlRepository.findById(id).orElseThrow(() -> new ResourceNotFound("Url not found with id " + id));
     }
 
-    private User findByUserId(int userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFound("User not found with id: " + userId));
+    private User findByUsername(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFound("User not found with email: " + email));
     }
+
 }

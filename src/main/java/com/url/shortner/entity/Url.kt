@@ -4,6 +4,7 @@ import jakarta.persistence.*
 import org.hibernate.annotations.Cache
 import org.hibernate.annotations.CacheConcurrencyStrategy
 import java.time.Instant
+import java.time.LocalDate
 
 
 @Entity
@@ -20,7 +21,7 @@ data class Url(
     var shortenUrl: String = "",
     var title: String = "",
     var suffix: String = "",
-    var expires: Instant? = null,
+    var expires: LocalDate? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
