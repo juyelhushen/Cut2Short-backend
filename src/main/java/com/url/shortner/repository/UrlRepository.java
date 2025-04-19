@@ -2,6 +2,8 @@ package com.url.shortner.repository;
 
 import com.url.shortner.entity.Url;
 import jakarta.persistence.QueryHint;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
@@ -22,6 +24,5 @@ public interface UrlRepository extends JpaRepository<Url, Integer> {
     @QueryHints(@QueryHint(name = "org.hibernate.cacheable", value = "true"))
     Optional<Url> findByOriginalUrl(@Param("originalUrl") String originalUrl);
 
-    List<Url> findUrlsByUserId(int userId);
-
+    Page<Url> findUrlsByUserId(int userId, Pageable pageable);
 }

@@ -13,7 +13,7 @@ public interface UrlService {
 
     public String filterUrl(UrlRequest request);
 
-    public UrlResponse createUrlForUser(String filteredUrl, UrlRequest request);
+    public UrlResponse createUrlForUser(String filteredUrl, UrlRequest request, String username);
 
     public UrlResponse createUrl(String filteredUrl, String originalUrl);
 
