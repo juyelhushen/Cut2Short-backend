@@ -13,6 +13,10 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -31,9 +35,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UrlServiceImpl implements UrlService {
-
-    @Value("${url.prefix}")
-    private String prefix;
 
     private final UrlRepository urlRepository;
     private final UserRepository userRepository;
@@ -57,7 +58,7 @@ public class UrlServiceImpl implements UrlService {
 
 
     @Override
-    public UrlResponse createUrlForUser(String filteredUrl, UrlRequest request) {
+    public UrlResponse createUrlForUser(String filteredUrl, UrlRequest request, String username) {
         Optional<Url> url = urlRepository.findByOriginalUrl(request.originalUrl());
         if (url.isPresent()) return new UrlResponse(url.get());
 
@@ -65,27 +66,38 @@ public class UrlServiceImpl implements UrlService {
                 .map(Url::getShortenUrl)
                 .collect(Collectors.toSet());
 
-        StringBuilder res = new StringBuilder();
-        StringBuilder suffix = new StringBuilder();
+        String res;
+        if (request.suffix() != null && !request.suffix().isBlank() && request.suffix().length() > 2) {
+            res = request.suffix();
+            if (urlSet.contains(res)) {
+                throw new IllegalArgumentException("Custom back-half already in use.");
+            }
+        } else {
+            StringBuilder suffix = new StringBuilder();
+            Random random = new Random();
 
-        while (true) {
-            for (int i = 0; i < 6; i++) suffix.append(filteredUrl.charAt(new Random().nextInt(filteredUrl.length())));
-            res.append(suffix);
-            if (!urlSet.contains(res.toString())) break;
-            else res = new StringBuilder();
+            do {
+                suffix.setLength(0);
+                for (int i = 0; i < 6; i++) {
+                    suffix.append(filteredUrl.charAt(random.nextInt(filteredUrl.length())));
+                }
+                res = suffix.toString();
+            } while (urlSet.contains(res));
         }
 
         Url newUrl = new Url();
         newUrl.setOriginalUrl(request.originalUrl());
-        newUrl.setShortenUrl(res.toString());
+        newUrl.setShortenUrl(res);
 
-        var user = findByUsername(request.email());
+        var user = findByUsername(username);
         newUrl.setUser(user);
         newUrl.setTitle(request.title());
         newUrl.setExpires(LocalDate.now().plusYears(1));
-        Url save = urlRepository.save(newUrl);
-        return new UrlResponse(save);
+
+        Url savedUrl = urlRepository.save(newUrl);
+        return new UrlResponse(savedUrl);
     }
+
 
     @Override
     public UrlResponse createUrl(String filteredUrl, String originalUrl) {
@@ -130,7 +142,9 @@ public class UrlServiceImpl implements UrlService {
 
     @Override
     public List<UrlResponse> findAllUrlByUserId(int userid) {
-        var urlListByUserId = urlRepository.findUrlsByUserId(userid);
+        Pageable pageable = PageRequest.of(0, 5, Sort.by("createdDate").descending());
+        Page<Url> urlList = urlRepository.findUrlsByUserId(userid,pageable);
+        var urlListByUserId = urlList.getContent();
         return urlListByUserId.stream().map(UrlResponse::new).toList();
     }
 
