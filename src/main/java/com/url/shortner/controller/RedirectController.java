@@ -25,7 +25,7 @@ public class RedirectController {
     @GetMapping("/{shortUrl}")
     public CompletableFuture<ResponseEntity<Void>> redirect(@PathVariable String shortUrl) {
         return urlService.getOriginalUrl(shortUrl).thenApply(originalUrl -> {
-            if (originalUrl.isBlank() || originalUrl.isEmpty()) {
+            if (originalUrl.isBlank()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
 

@@ -14,15 +14,15 @@ import java.time.Instant
 abstract class Auditable {
 
     @CreatedBy
-    var createdBy: String? = null
+    open var createdBy: String? = null
 
     @CreatedDate
-    var createdDate: Instant? = null
+    open var createdDate: Instant? = null
 
     @LastModifiedBy
-    var lastModifiedBy: String? = null
+    open var lastModifiedBy: String? = null
 
     @LastModifiedDate
-    var lastModifiedDate: Instant? = null
+    open var lastModifiedDate: Instant? = null
 
 }

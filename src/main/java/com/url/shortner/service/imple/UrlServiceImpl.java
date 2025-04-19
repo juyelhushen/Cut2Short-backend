@@ -29,6 +29,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 
@@ -92,6 +93,7 @@ public class UrlServiceImpl implements UrlService {
         var user = findByUsername(username);
         newUrl.setUser(user);
         newUrl.setTitle(request.title());
+        newUrl.setHitCount(0L);
         newUrl.setExpires(LocalDate.now().plusYears(1));
 
         Url savedUrl = urlRepository.save(newUrl);
@@ -122,7 +124,7 @@ public class UrlServiceImpl implements UrlService {
         Url newUrl = new Url();
         newUrl.setOriginalUrl(originalUrl);
         newUrl.setShortenUrl(res.toString());
-
+        newUrl.setHitCount(0L);
 
         var save = urlRepository.save(newUrl);
         return new UrlResponse(save);
@@ -135,10 +137,16 @@ public class UrlServiceImpl implements UrlService {
         return CompletableFuture.supplyAsync(() -> {
             Url url = urlRepository.findByShortenUrl(shortUrl)
                     .orElseThrow(() -> new RuntimeException("Url not found"));
+            urlRepository.incrementHitCount(url.getId());
             return url.getOriginalUrl();
         });
     }
 
+    @Override
+    public UrlResponse findUrlById(int id) {
+        var urlResponse = findById(id);
+        return new UrlResponse(urlResponse);
+    }
 
     @Override
     public List<UrlResponse> findAllUrlByUserId(int userid) {
@@ -158,14 +166,14 @@ public class UrlServiceImpl implements UrlService {
 
     @Override
     public UrlResponse updateUrl(UrlRequest request) {
-        var url = findUrlById(request.id());
+        var url = findById(request.id());
         url.setOriginalUrl(request.originalUrl());
         url.setTitle(request.title());
         var updatedUrl = urlRepository.save(url);
         return new UrlResponse(updatedUrl);
     }
 
-    private Url findUrlById(int id) {
+    private Url findById(int id) {
         return urlRepository.findById(id).orElseThrow(() -> new ResourceNotFound("Url not found with id " + id));
     }
 

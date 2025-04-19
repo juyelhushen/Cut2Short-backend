@@ -5,6 +5,7 @@ import org.hibernate.annotations.Cache
 import org.hibernate.annotations.CacheConcurrencyStrategy
 import java.time.Instant
 import java.time.LocalDate
+import java.util.concurrent.atomic.AtomicLong
 
 
 @Entity
@@ -20,8 +21,8 @@ data class Url(
     var originalUrl: String = "",
     var shortenUrl: String = "",
     var title: String = "",
-    var suffix: String = "",
     var expires: LocalDate? = null,
+    var hitCount: Long = 0,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
