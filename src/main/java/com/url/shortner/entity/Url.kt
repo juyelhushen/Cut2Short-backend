@@ -23,6 +23,7 @@ data class Url(
     var title: String = "",
     var expires: LocalDate? = null,
     var hitCount: Long = 0,
+    var suffix: String = "",
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")

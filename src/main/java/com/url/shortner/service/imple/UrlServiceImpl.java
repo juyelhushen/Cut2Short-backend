@@ -68,11 +68,9 @@ public class UrlServiceImpl implements UrlService {
                 .collect(Collectors.toSet());
 
         String res;
-        if (request.suffix() != null && !request.suffix().isBlank() && request.suffix().length() > 2) {
+        if (request.suffix() != null && !request.suffix().isBlank()) {
             res = request.suffix();
-            if (urlSet.contains(res)) {
-                throw new IllegalArgumentException("Custom back-half already in use.");
-            }
+            if (urlSet.contains(res)) throw new IllegalArgumentException("Custom back-half already in use.");
         } else {
             StringBuilder suffix = new StringBuilder();
             Random random = new Random();
@@ -94,6 +92,8 @@ public class UrlServiceImpl implements UrlService {
         newUrl.setUser(user);
         newUrl.setTitle(request.title());
         newUrl.setHitCount(0L);
+        newUrl.setSuffix(res);
+
         newUrl.setExpires(LocalDate.now().plusYears(1));
 
         Url savedUrl = urlRepository.save(newUrl);
@@ -167,8 +167,12 @@ public class UrlServiceImpl implements UrlService {
     @Override
     public UrlResponse updateUrl(UrlRequest request) {
         var url = findById(request.id());
-        url.setOriginalUrl(request.originalUrl());
+//        url.setOriginalUrl(request.originalUrl());
         url.setTitle(request.title());
+        if (request.suffix() != null && !request.suffix().isBlank()) {
+            url.setSuffix(request.suffix());
+            url.setShortenUrl(request.suffix());
+        }
         var updatedUrl = urlRepository.save(url);
         return new UrlResponse(updatedUrl);
     }
