@@ -60,11 +60,12 @@
         </dependency>
 
         <!--  for mail feature-->
-        <dependency>
-            <groupId>com.sendgrid</groupId>
-            <artifactId>sendgrid-java</artifactId>
-            <version>4.9.2</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.sendgrid</groupId>-->
+<!--            <artifactId>sendgrid-java</artifactId>-->
+<!--            <version>4.9.2</version>-->
+<!--        </dependency>-->
+
 
 
         <!--        //kotlin support-->
@@ -140,6 +141,12 @@
             <artifactId>spring-boot-starter-oauth2-client</artifactId>
         </dependency>
 
+<!--        <dependency>-->
+<!--            <groupId>com.fasterxml.jackson.core</groupId>-->
+<!--            <artifactId>jackson-databind</artifactId>-->
+<!--            <version>2.19.0</version>-->
+<!--        </dependency>-->
+
         <dependency>
             <groupId>org.ehcache</groupId>
             <artifactId>ehcache</artifactId>
@@ -147,7 +154,7 @@
         </dependency>
 
         <dependency>
-            <groupId>org.hibernate</groupId>
+            <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-jcache</artifactId>
             <version>6.5.1.Final</version>
         </dependency>
@@ -186,10 +193,6 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
     </dependencies>
 
@@ -254,6 +257,7 @@
                 </executions>
             </plugin>
         </plugins>
+        <finalName>cut2short</finalName>
     </build>
 
 </project>
