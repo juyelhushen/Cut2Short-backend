@@ -5,10 +5,12 @@ import jakarta.persistence.QueryHint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,4 +27,10 @@ public interface UrlRepository extends JpaRepository<Url, Integer> {
     Optional<Url> findByOriginalUrl(@Param("originalUrl") String originalUrl);
 
     Page<Url> findUrlsByUserId(int userId, Pageable pageable);
+
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Url u SET u.hitCount = u.hitCount + 1 WHERE u.id = :id")
+    void incrementHitCount(@Param("id") int id);
 }

@@ -25,4 +25,6 @@ public interface UrlService {
     boolean deleteUrlById(int id);
 
     UrlResponse updateUrl(UrlRequest request);
+
+    UrlResponse findUrlById(int id);
 }

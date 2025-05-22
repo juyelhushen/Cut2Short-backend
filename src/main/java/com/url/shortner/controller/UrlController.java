@@ -72,6 +72,13 @@ public class UrlController {
         }
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<APIResponse> getUrlById(@PathVariable int id) {
+        var response = urlService.findUrlById(id);
+        var apiResponse = new APIResponse(true, Constant.DATA_FETCH_SUCCESS, HttpStatus.OK.value(), response);
+        return ResponseEntity.ok(apiResponse);
+    }
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<APIResponse> deleteUrl(@PathVariable int id) {
         var response = urlService.deleteUrlById(id);

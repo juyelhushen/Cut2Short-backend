@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
     public AuthResponse login(UserRequest request) {
         log.info("checking username {}", request.email());
         try {
-            Authentication auth = authenticationManager.authenticate(
+            var auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.email(), request.password())
             );
 

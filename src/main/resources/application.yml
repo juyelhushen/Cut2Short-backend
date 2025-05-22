@@ -6,9 +6,11 @@ spring:
     name: url-shortner
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/url
-    password: postgres
+#    url: jdbc:postgresql://localhost:5432/url
+    url: jdbc:postgresql://c2s.cd8ek2aasikq.ap-south-1.rds.amazonaws.com:5432/c2s
     username: postgres
+    password: ${PASSWORD}
+#    password: postgres
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -64,10 +66,10 @@ spring:
             token-uri: https://github.com/login/oauth/access_token
             user-info-uri: https://api.github.com/user
 
-  mail:
-    username: ${USERNAME}
-  sendgrid:
-    api-key: ${API_KEY}
+#  mail:
+#    username: ${USERNAME}
+#  sendgrid:
+#    api-key: ${API_KEY}
 
 logging:
   #    file:
