@@ -55,9 +55,7 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request ->
                         request
-                                .requestMatchers("/api/user/login","/api/user/register", "/oauth2/**").permitAll()
-                                .requestMatchers("/api/v1/url/shorten").permitAll()
-                                .requestMatchers(AUTH_WHITELIST).permitAll()
+                                .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authEntryPoint))
@@ -91,7 +89,11 @@ public class SecurityConfiguration {
     }
 
 
-    private static final String[] AUTH_WHITELIST = {
+    public static final String[] PUBLIC_ENDPOINTS = {
+            "/api/v1/url/shorten",
+            "/api/user/login",
+            "/api/user/register",
+            "/oauth2/**",
             "/api/v1/auth/**",
             "/v3/api-docs/**",
             "/v3/api-docs.yaml",
