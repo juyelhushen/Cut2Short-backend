@@ -27,13 +27,10 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-@Slf4j
 @SpringBootApplication
 @OpenAPIDefinition(info =
 @Info(title = "Url Shortner's API", version = "1.0", description = "Documentation Authentication API v1.0"))
 @EnableScheduling
-//@RestController
-//@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UrlshortnerApplication {
 
     public static void main(String[] args) {

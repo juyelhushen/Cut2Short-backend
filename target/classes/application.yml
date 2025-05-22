@@ -95,4 +95,4 @@ url:
 
 #Secret Key
 Secret:
-  key: fkgnkvbkdfgrthgsfvfghjgnfdhguigndfjvkndffdkngdfkj
+  key: ${SECRET_KEY}
