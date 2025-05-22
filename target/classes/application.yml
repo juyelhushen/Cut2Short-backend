@@ -1,0 +1,97 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: url-shortner
+
+  datasource:
+#    url: jdbc:postgresql://localhost:5432/url
+    url: jdbc:postgresql://c2s.cd8ek2aasikq.ap-south-1.rds.amazonaws.com:5432/c2s
+    username: postgres
+    password: awsc2s2025
+#    password: ${PASSWORD}
+#    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        cache:
+          use_second_level_cache: true
+          region:
+            factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
+          use_query_cache: true
+      javax:
+        cache:
+          provider: org.ehcache.jsr107.EhcacheCachingProvider
+#          default_schema: url
+
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${GIT_CLIENT_ID}
+            client-secret: ${GIT_CLIENT_SECRET}
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            client-name: GitHub
+            scope:
+              - read:user
+              - user:email
+
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: profile, email
+        provider:
+          google:
+            authorization-uri:  https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+          github:
+            authorization-uri: https://github.com/login/oauth/authorize
+            token-uri: https://github.com/login/oauth/access_token
+            user-info-uri: https://api.github.com/user
+
+#  mail:
+#    username: ${USERNAME}
+#  sendgrid:
+#    api-key: ${API_KEY}
+
+logging:
+  #    file:
+  #      path: logs/
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} ${LOG_LEVEL_PATTERN:-%5p} %m%n"
+  #      file: "%d %-5level [%thread] %logger : %msg%n"
+  level:
+    web: error
+    root: info
+    sql: error
+    org:
+      hibernate:
+        cache:
+          spi: debug
+
+#url
+url:
+  prefix: http://localhost:8080/c2s/
+
+
+#Secret Key
+Secret:
+  key: fkgnkvbkdfgrthgsfvfghjgnfdhguigndfjvkndffdkngdfkj

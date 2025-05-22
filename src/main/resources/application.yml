@@ -9,7 +9,8 @@ spring:
 #    url: jdbc:postgresql://localhost:5432/url
     url: jdbc:postgresql://c2s.cd8ek2aasikq.ap-south-1.rds.amazonaws.com:5432/c2s
     username: postgres
-    password: ${PASSWORD}
+    password: awsc2s2025
+#    password: ${PASSWORD}
 #    password: postgres
     driver-class-name: org.postgresql.Driver
 
