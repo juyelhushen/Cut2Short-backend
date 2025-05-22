@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: url-shortner
+    name: cut2short
 
   threads:
     virtual:
@@ -32,6 +32,7 @@ spring:
       javax:
         cache:
           provider: org.ehcache.jsr107.EhcacheCachingProvider
+          uri: classpath:ehcache.xml
 #          default_schema: url
 
   devtools:
@@ -90,9 +91,9 @@ logging:
 
 #url
 url:
-  prefix: http://localhost:8080/c2s/
+  prefix: https://cut2short-backend.onrender.com/c2s/
 
 
 #Secret Key
 Secret:
-  key: fkgnkvbkdfgrthgsfvfghjgnfdhguigndfjvkndffdkngdfkj
+  key: ${SECRET_KEY}
