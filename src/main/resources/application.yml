@@ -5,13 +5,14 @@ spring:
   application:
     name: url-shortner
 
+  threads:
+    virtual:
+      enabled: true
+
   datasource:
-#    url: jdbc:postgresql://localhost:5432/url
     url: jdbc:postgresql://c2s.cd8ek2aasikq.ap-south-1.rds.amazonaws.com:5432/c2s
     username: postgres
-    password: awsc2s2025
-#    password: ${PASSWORD}
-#    password: postgres
+    password: ${PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
