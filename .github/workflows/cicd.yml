@@ -12,7 +12,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 21
-          distribution: openjdk
+          distribution: temurin
       - name: Run Test with Maven
         run: mvn test
 
