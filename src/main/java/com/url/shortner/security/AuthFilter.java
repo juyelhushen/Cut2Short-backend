@@ -45,6 +45,7 @@ public class AuthFilter extends OncePerRequestFilter {
         return shouldSkip;
     }
 
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
