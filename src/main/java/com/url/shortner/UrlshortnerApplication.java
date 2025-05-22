@@ -39,37 +39,4 @@ public class UrlshortnerApplication {
     public static void main(String[] args) {
         SpringApplication.run(UrlshortnerApplication.class, args);
     }
-//
-//    private final RestTemplate restTemplate;
-//
-//
-//    @GetMapping("/test")
-//    public ResponseEntity<String> test() {
-//        var url = "https://dummy.restapiexample.com/api/v1/employees";
-////        try {
-////            HttpClient client = HttpClient.newHttpClient();
-////
-////            HttpRequest request = HttpRequest.newBuilder()
-////                    .uri(URI.create("https://dummy.restapiexample.com/api/v1/employees"))
-////                    .header("Accept", "application/json")
-////                    .GET()
-////                    .build();
-////
-////            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-////
-////            // Log and return the JSON response
-////            log.info("Status Code: {}", response.statusCode());
-////            log.info("Response Body: {}", response.body());
-////
-////            return ResponseEntity.ok(response.body());
-////
-////        } catch (Exception e) {
-////            e.printStackTrace();
-////            return ResponseEntity.status(500).body("Error occurred while calling the external API.");
-////        }
-//        var response = restTemplate.getForEntity(url, String.class);
-//        return ResponseEntity.ok(response.getBody());
-//
-//    }
-
 }

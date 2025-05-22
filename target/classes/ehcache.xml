@@ -1,0 +1,18 @@
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNameSpaceSchemaLocation="http://www.ehcache.org/ehcache.xsd" version="1.0" encoding="">
+    <cache
+            alias="userDetailsCache"
+            maxElementsInMemory="1000"
+            timeToLiveSeconds="600"
+            timeToIdleSeconds="300"
+            overflowToDisk="false"
+            eternal="false"
+            evictionStrategy="FIFO"
+    />
+    <cache
+            alias="urlDetailsCache"
+            maxElementsInMemory="1000"
+            timeToLiveSeconds="200"
+            evictionStrategy="FIFO"
+    />
+</ehcache>
