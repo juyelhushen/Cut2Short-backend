@@ -6,14 +6,14 @@ import com.url.shortner.repository.UserRepository;
 import com.url.shortner.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -22,7 +22,7 @@ import java.util.Map;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository repository;
@@ -49,22 +49,34 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .email(finalEmail)
                     .role(Role.USER)
                     .build();
-            return repository.save(newUser);
+            User savedUser = repository.save(newUser);
+            log.info("Created new user: id={}, email={}", savedUser.getId(), finalEmail);
+            return savedUser;
         });
 
         var token = jwtUtils.generateFromOAuth2User(email, Role.USER);
 
         Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
         attributes.put("token", token);
-        attributes.put("userid", user.getId());
+        attributes.put("userId", user.getId());
 
         String principalAttribute = oAuth2User.getAttribute("email") != null ? "email" : "login";
 
-
-        return new DefaultOAuth2User(
+        OAuth2User customUser = new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())),
                 attributes,
                 principalAttribute
         );
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new OAuth2AuthenticationToken(
+                        customUser,
+                        customUser.getAuthorities(),
+                        userRequest.getClientRegistration().getRegistrationId()
+                )
+        );
+
+        log.info("SecurityContextHolder set with user: id={}, email={}", user.getId(), email);
+        return customUser;
     }
 }

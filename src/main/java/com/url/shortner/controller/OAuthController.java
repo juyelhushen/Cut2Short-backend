@@ -5,26 +5,31 @@ import com.url.shortner.utils.Constant;
 import com.url.shortner.wrapper.AuthResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
 @RequestMapping
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 public class OAuthController {
 
     @GetMapping("/oauth2/callback")
-    public ResponseEntity<?> handleOAuth2Login(OAuth2AuthenticationToken authenticationToken) {
-        if (authenticationToken == null || !authenticationToken.isAuthenticated())
+    public ResponseEntity<?> handleOAuth2Login() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof OAuth2User)) {
+            log.error("User is not authenticated. SecurityContextHolder: {}", SecurityContextHolder.getContext());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
-        OAuth2User principal = authenticationToken.getPrincipal();
-        log.info("User is authenticated");
+        }
+
+        OAuth2User principal = (OAuth2User) authentication.getPrincipal();
+        log.info("User is authenticated: email={}", principal.getAttribute("email"));
 
         String email = principal.getAttribute("email");
         if (email == null) {
@@ -32,15 +37,18 @@ public class OAuthController {
             email = principal.getAttribute("login") + "@github.com";
         }
 
-        int userId = principal.getAttribute("userid");
+        Integer userId = principal.getAttribute("userId");
         String name = principal.getAttribute("name");
-        var token = principal.getAttribute("token");
-        assert token != null;
+        String token = principal.getAttribute("token");
 
-        AuthResponse auth = new AuthResponse(userId, name,email,token.toString());
-        APIResponse response = new APIResponse(true, Constant.LOGIN_SUCCESS,HttpStatus.CREATED.value(), auth);
+        if (userId == null || token == null) {
+            log.error("Missing userId or token in OAuth2User attributes: userId={}, token={}", userId, token);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Missing user data");
+        }
+
+        AuthResponse auth = new AuthResponse(userId, name, email, token);
+        APIResponse response = new APIResponse(true, Constant.LOGIN_SUCCESS, HttpStatus.CREATED.value(), auth);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-
 }

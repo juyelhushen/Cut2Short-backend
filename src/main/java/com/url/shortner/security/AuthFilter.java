@@ -40,7 +40,9 @@ public class AuthFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        boolean shouldSkip = Arrays.stream(WHITELIST).anyMatch(path::startsWith);
+        boolean shouldSkip = Arrays.stream(WHITELIST)
+                .map(pattern -> pattern.endsWith("/**") ? pattern.substring(0, pattern.length() - 3) : pattern)
+                .anyMatch(path::startsWith);
         log.info("Checking path: {} | Should skip filter: {}", path, shouldSkip);
         return shouldSkip;
     }

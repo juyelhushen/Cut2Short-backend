@@ -1,5 +1,12 @@
 server:
   port: 8080
+  servlet:
+    session:
+      cookie:
+        same-site: none
+        secure: true
+        http-only: true
+        name: JSESSIONID
 
 spring:
   application:
@@ -33,7 +40,8 @@ spring:
         cache:
           provider: org.ehcache.jsr107.EhcacheCachingProvider
           uri: classpath:ehcache.xml
-#          default_schema: url
+    open-in-view: false
+  #          default_schema: url
 
   devtools:
     restart:

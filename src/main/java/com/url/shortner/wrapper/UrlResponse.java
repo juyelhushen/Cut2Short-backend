@@ -16,7 +16,7 @@ public record UrlResponse(int id, String title, String originalUrl, String short
                           long hitCount
 ) {
     public UrlResponse(Url url) {
-        this(url.getId(), url.getTitle(), url.getOriginalUrl(), "http://localhost:8080/c2s/" + url.getShortenUrl(),
+        this(url.getId(), url.getTitle(), url.getOriginalUrl(), "https://cut2short-backend.onrender.com/c2s/" + url.getShortenUrl(),
                 url.getSuffix(),
                 LocalDateTime.ofInstant(Objects.requireNonNull(url.getCreatedDate()), ZoneId.of("UTC")),
                 LocalDateTime.ofInstant(Objects.requireNonNull(url.getLastModifiedDate()), ZoneId.of("UTC")),
