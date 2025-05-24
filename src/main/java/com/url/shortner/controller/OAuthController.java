@@ -23,13 +23,12 @@ public class OAuthController {
     @GetMapping("/oauth2/callback")
     public ResponseEntity<?> handleOAuth2Login() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof OAuth2User)) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof OAuth2User principal)) {
             log.error("User is not authenticated. SecurityContextHolder: {}", SecurityContextHolder.getContext());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated");
         }
 
-        OAuth2User principal = (OAuth2User) authentication.getPrincipal();
-        log.info("User is authenticated: email={}", principal.getAttribute("email"));
+        log.info("User is authenticated: email={}", (Object) principal.getAttribute("email"));
 
         String email = principal.getAttribute("email");
         if (email == null) {
