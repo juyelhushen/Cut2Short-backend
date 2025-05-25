@@ -123,7 +123,7 @@ public class SecurityConfiguration {
 //        CorsConfiguration configuration = new CorsConfiguration();
 //        configuration.setAllowedOrigins(List.of(
 //                "http://localhost:3000",
-//                "https://cut2short-frontend.onrender.com"
+//                "https://cut2short-front.onrender.com"
 //        ));
 ////        configuration.addAllowedOrigin("http://localhost:3000");
 //        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
@@ -140,7 +140,7 @@ public class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:3000",
-                "https://cut2short-frontend.onrender.com"
+                "https://cut2short-front.onrender.com"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.addAllowedHeader("*");
