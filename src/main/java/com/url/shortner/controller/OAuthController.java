@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class OAuthController {
 
+
+
     @GetMapping("/oauth2/callback")
     public ResponseEntity<?> handleOAuth2Login() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
