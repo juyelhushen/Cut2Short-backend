@@ -61,14 +61,6 @@ public class SecurityConfiguration {
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authEntryPoint))
-//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-//                .sessionManagement(session -> session
-//                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-//                        .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::migrateSession)
-//                        .sessionAuthenticationStrategy((authentication, request, response) -> {
-//                            log.info("Session created for user: {}", authentication.getName());
-//                        })
-//                )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                         .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::migrateSession)
@@ -76,7 +68,8 @@ public class SecurityConfiguration {
                 .authenticationProvider(authenticationProvider())
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                        .defaultSuccessUrl("http://localhost:3000/oauth2/callback", true)
+                        .defaultSuccessUrl("https://cut2short-front.onrender.com/oauth2/callback", true)
+//                        .defaultSuccessUrl("http://localhost:3000/oauth2/callback", true)
                         .failureHandler((request, response, exception) -> {
                             log.error("OAuth2 login failed: {}", exception.getMessage());
                             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "OAuth2 login failed");
