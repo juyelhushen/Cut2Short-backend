@@ -20,9 +20,11 @@ import java.util.function.Function;
 public class JwtUtils {
 
 
-    private final long JWT_EXPIRATION_MS = 86400000;   // 24 hours
-    @Value("${Secret.key}")
-    private String secretKey;
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
+    @Value("${jwt.expiration}")
+    private long jwtExpirationMs;
 
     public String extractUsername(String token) {
         return extractClaims(token, Claims::getSubject);
@@ -64,7 +66,7 @@ public class JwtUtils {
                 .claims(claims)
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + JWT_EXPIRATION_MS ))
+                .expiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
 //                .claim("authorities", role)
                 .signWith(getSignInKey())
                 .compact();
@@ -92,7 +94,7 @@ public class JwtUtils {
     }
 
     private SecretKey getSignInKey() {
-        byte[] keyInBites = Decoders.BASE64.decode(secretKey);
+        byte[] keyInBites = Decoders.BASE64.decode(jwtSecret);
         return Keys.hmacShaKeyFor(keyInBites);
     }
 

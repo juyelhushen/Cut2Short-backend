@@ -9,16 +9,12 @@ server:
 spring:
   application:
     name: cut2short
+  profiles:
+    active: prod
 
   threads:
     virtual:
       enabled: true
-
-  datasource:
-    url: jdbc:postgresql://c2s.cd8ek2aasikq.ap-south-1.rds.amazonaws.com:5432/c2s
-    username: postgres
-    password: ${PASSWORD}
-    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
@@ -99,7 +95,10 @@ logging:
 url:
   prefix: https://cut2short-backend.onrender.com/c2s/
 
+jwt:
+  expiration: 86400000
+  secret: fkgnkvbkdfgrthgsfvfghjgnfdhguigndfjvkndffdkngdfkj
 
 #Secret Key
-Secret:
-  key: ${SECRET_KEY}
+#Secret:
+#  key: fkgnkvbkdfgrthgsfvfghjgnfdhguigndfjvkndffdkngdfkj

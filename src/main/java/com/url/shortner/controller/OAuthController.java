@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class OAuthController {
 
-
-
     @GetMapping("/oauth2/callback")
     public ResponseEntity<?> handleOAuth2Login() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -41,13 +39,14 @@ public class OAuthController {
         Integer userId = principal.getAttribute("userId");
         String name = principal.getAttribute("name");
         String token = principal.getAttribute("token");
+        String profile = principal.getAttribute("profile");
 
         if (userId == null || token == null) {
             log.error("Missing userId or token in OAuth2User attributes: userId={}, token={}", userId, token);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Missing user data");
         }
 
-        AuthResponse auth = new AuthResponse(userId, name, email, token);
+        AuthResponse auth = new AuthResponse(userId, name, email, token, profile);
         APIResponse response = new APIResponse(true, Constant.LOGIN_SUCCESS, HttpStatus.CREATED.value(), auth);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
             SecurityContextHolder.getContext().setAuthentication(auth);
 
             String token = jwtUtils.generate(savedUser.getId(), savedUser.getEmail(), Role.USER);
-            return new AuthResponse(savedUser.getId(),savedUser.getFullName(), savedUser.getEmail(), token);
+            return new AuthResponse(savedUser.getId(),savedUser.getFullName(), savedUser.getEmail(), token, savedUser.getImageUrl());
 
         }
         return null;
@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
                 User user = findByUsername(request.email());
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 String token = jwtUtils.generate(user.getId(), user.getEmail(), Role.USER);
-                return new AuthResponse(user.getId(),user.getFullName(), user.getEmail(), token);
+                return new AuthResponse(user.getId(),user.getFullName(), user.getEmail(), token, user.getImageUrl());
             }
 
             return null;

@@ -28,6 +28,8 @@ public class User extends Auditable {
 
     private String lastName;
 
+    private String imageUrl;
+
 
 //    @NotNull
 //    @Email(message = "please enter correct email", regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
@@ -43,6 +45,9 @@ public class User extends Auditable {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
+
+    @Column(unique = true)
+    private String oauth2Id;
 
     @JsonIgnore
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "user")

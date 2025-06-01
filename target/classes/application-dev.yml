@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/cut2short
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+
+cors:
+  url: http://localhost:3000
+
+callback:
+  url: http://localhost:3000/oauth2/callback
+
+app:
+  base-url: http://localhost:8080/c2s/
