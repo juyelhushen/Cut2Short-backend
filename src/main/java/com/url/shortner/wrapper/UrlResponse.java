@@ -2,6 +2,7 @@ package com.url.shortner.wrapper;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.url.shortner.entity.Url;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -15,8 +16,16 @@ public record UrlResponse(int id, String title, String originalUrl, String short
                           LocalDateTime updatedAt,
                           long hitCount
 ) {
+    private static String BASE_URL;
+
+    @Value("${app.base-url}")
+    public void setBaseUrl(String baseUrl) {
+        BASE_URL = baseUrl;
+    }
+
     public UrlResponse(Url url) {
-        this(url.getId(), url.getTitle(), url.getOriginalUrl(), "https://cut2short-backend.onrender.com/c2s/" + url.getShortenUrl(),
+        this(url.getId(), url.getTitle(), url.getOriginalUrl(),
+                BASE_URL + url.getShortenUrl(),
                 url.getSuffix(),
                 LocalDateTime.ofInstant(Objects.requireNonNull(url.getCreatedDate()), ZoneId.of("UTC")),
                 LocalDateTime.ofInstant(Objects.requireNonNull(url.getLastModifiedDate()), ZoneId.of("UTC")),

@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,6 +28,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.session.web.http.DefaultCookieSerializer;
@@ -42,6 +44,12 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 public class SecurityConfiguration {
+
+    @Value("${callback.url}")
+    private String callbackUrl;
+
+    @Value("${cors.url}")
+    private String corsUrl;
 
     private final AuthFilter authFilter;
     private final UserDetailServiceImpl userDetailService;
@@ -68,8 +76,7 @@ public class SecurityConfiguration {
                 .authenticationProvider(authenticationProvider())
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                        .defaultSuccessUrl("https://cut2short-front.onrender.com/oauth2/callback", true)
-//                        .defaultSuccessUrl("http://localhost:3000/oauth2/callback", true)
+                        .defaultSuccessUrl(callbackUrl, true)
                         .failureHandler((request, response, exception) -> {
                             log.error("OAuth2 login failed: {}", exception.getMessage());
                             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "OAuth2 login failed");
@@ -111,30 +118,10 @@ public class SecurityConfiguration {
             "/swagger-ui.html"
     };
 
-//    @Bean
-//    public CorsConfigurationSource corsConfigurationSource() {
-//        CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.setAllowedOrigins(List.of(
-//                "http://localhost:3000",
-//                "https://cut2short-front.onrender.com"
-//        ));
-////        configuration.addAllowedOrigin("http://localhost:3000");
-//        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
-//        configuration.addAllowedHeader("*");
-//        configuration.setAllowCredentials(true);
-//        configuration.setMaxAge(3600L);
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", configuration);
-//        return source;
-//    }
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "https://cut2short-front.onrender.com"
-        ));
+        configuration.addAllowedOrigin(corsUrl);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
@@ -143,7 +130,6 @@ public class SecurityConfiguration {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 
 
     @Bean

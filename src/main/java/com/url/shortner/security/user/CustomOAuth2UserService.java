@@ -25,42 +25,56 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
-    private final UserRepository repository;
+    private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
-        log.info("loadUser : {}", oAuth2User);
+        log.info("loadUser: {}", oAuth2User.getAttributes());
 
+        String provider = userRequest.getClientRegistration().getRegistrationId();
         String email = oAuth2User.getAttribute("email");
-        if (email == null) {  //fallback
-            log.warn("Email not provided by GitHub, attempting to use login as email.");
-            email = oAuth2User.getAttribute("login") + "@github.com";
+        String oauth2Id;
+
+        if ("github".equals(provider)) {
+            if (email == null) {
+                email = oAuth2User.getAttribute("login") + "@github.com";
+            }
+            oauth2Id = "github_" + oAuth2User.getAttribute("id");
+        } else { // google
+            oauth2Id = "google_" + oAuth2User.getAttribute("sub");
         }
 
+        String imageUrl = oAuth2User.getAttribute("picture");
         String name = oAuth2User.getAttribute("name");
         String finalEmail = email;
-        User user = repository.findByEmail(email).orElseGet(() -> {
-            String[] names = name != null ? name.split(" ") : new String[]{"Unknown"};
-            User newUser = User.builder()
-                    .firstName(names[0])
-                    .lastName(names.length > 1 ? names[1] : null)
-                    .email(finalEmail)
-                    .role(Role.USER)
-                    .build();
-            User savedUser = repository.save(newUser);
-            log.info("Created new user: id={}, email={}", savedUser.getId(), finalEmail);
-            return savedUser;
-        });
+
+        User user = userRepository.findByOauth2Id(oauth2Id)
+                .orElseGet(() -> userRepository.findByEmail(finalEmail)
+                        .orElseGet(() -> {
+                            String[] names = name != null ? name.split(" ") : new String[]{"Unknown"};
+                            User newUser = User.builder()
+                                    .firstName(names[0])
+                                    .lastName(names.length > 1 ? names[1] : null)
+                                    .email(finalEmail)
+                                    .role(Role.USER)
+                                    .imageUrl(imageUrl)
+                                    .oauth2Id(oauth2Id)
+                                    .build();
+                            User savedUser = userRepository.save(newUser);
+                            log.info("Created new user: id={}, email={}", savedUser.getId(), finalEmail);
+                            return savedUser;
+                        }));
 
         var token = jwtUtils.generateFromOAuth2User(email, Role.USER);
 
         Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
         attributes.put("token", token);
         attributes.put("userId", user.getId());
+        attributes.put("profile", imageUrl);
 
-        String principalAttribute = oAuth2User.getAttribute("email") != null ? "email" : "login";
+        String principalAttribute = "email";
 
         OAuth2User customUser = new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())),
@@ -72,11 +86,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 new OAuth2AuthenticationToken(
                         customUser,
                         customUser.getAuthorities(),
-                        userRequest.getClientRegistration().getRegistrationId()
+                        provider
                 )
         );
 
-        log.info("SecurityContextHolder set with user: id={}, email={}", user.getId(), email);
+        log.info("SecurityContextHolder set with user: id={}, email={}", user.getId(), finalEmail);
         return customUser;
     }
 }

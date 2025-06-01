@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://c2s.cd8ek2aasikq.ap-south-1.rds.amazonaws.com:5432/c2s
+    username: postgres
+    password: ${PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+
+
+cors:
+  url: https://cut2short-front.onrender.com
+
+callback:
+  url: https://cut2short-front.onrender.com/oauth2/callback
+
+app:
+  base-url: https://cut2short-backend.onrender.com/c2s/

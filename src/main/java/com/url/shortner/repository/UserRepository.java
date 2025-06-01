@@ -16,4 +16,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     @Query("SELECT U FROM User U WHERE U.email = :email")
     @QueryHints(@QueryHint(name = "org.hibernate.cacheable", value = "true"))
     Optional<User> findByEmail(@Param("email") String email);
+
+    Optional<User> findByOauth2Id(String oauth2Id);
 }
