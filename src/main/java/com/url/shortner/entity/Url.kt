@@ -2,10 +2,8 @@ package com.url.shortner.entity
 
 import jakarta.persistence.*
 import org.hibernate.annotations.Cache
-import org.hibernate.annotations.CacheConcurrencyStrategy
-import java.time.Instant
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import java.time.LocalDate
-import java.util.concurrent.atomic.AtomicLong
 
 
 @Entity
@@ -27,5 +25,9 @@ data class Url(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    var user: User? = null
+    var user: User? = null,
+
+    @OneToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, mappedBy = "url")
+    var qrCode: QRCode? = null
+
 ) : Auditable() {}
