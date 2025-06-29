@@ -1,9 +1,12 @@
 package com.url.shortner.service;
 
+import com.google.zxing.WriterException;
 import com.url.shortner.payload.UrlRequest;
 import com.url.shortner.payload.UserRequest;
 import com.url.shortner.wrapper.UrlResponse;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -27,4 +30,7 @@ public interface UrlService {
     UrlResponse updateUrl(UrlRequest request);
 
     UrlResponse findUrlById(int id);
+
+    byte[] generateAndSaveQRCode(String url, String title) throws WriterException, IOException, URISyntaxException;
+    byte[] getQRCodeByUrlId(Integer urlId);
 }

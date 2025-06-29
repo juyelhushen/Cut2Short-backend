@@ -1,10 +1,17 @@
 package com.url.shortner.service.imple;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
+import com.url.shortner.entity.QRCode;
 import com.url.shortner.entity.Url;
 import com.url.shortner.entity.User;
 import com.url.shortner.exception.ResourceNotFound;
 import com.url.shortner.payload.UrlRequest;
 import com.url.shortner.payload.UserRequest;
+import com.url.shortner.repository.QRCodeRepository;
 import com.url.shortner.repository.UrlRepository;
 import com.url.shortner.repository.UserRepository;
 import com.url.shortner.service.UrlService;
@@ -23,6 +30,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -40,10 +54,17 @@ public class UrlServiceImpl implements UrlService {
     private final UrlRepository urlRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final QRCodeRepository qrCodeRepository;
+
+    @Value("${app.base-url}")
+    private String BASE_URL;
 
     @Override
     public List<UrlResponse> findAllUrl() {
-        return urlRepository.findAll().stream().map(UrlResponse::new).toList();
+        return urlRepository.findAll()
+                .stream()
+                .map((url) -> new UrlResponse(url, BASE_URL))
+                .toList();
     }
 
 
@@ -58,11 +79,7 @@ public class UrlServiceImpl implements UrlService {
     }
 
 
-    @Override
-    public UrlResponse createUrlForUser(String filteredUrl, UrlRequest request, String username) {
-        Optional<Url> url = urlRepository.findByOriginalUrl(request.originalUrl());
-        if (url.isPresent()) return new UrlResponse(url.get());
-
+    private String shortenUrl(String filteredUrl, UrlRequest request) {
         Set<String> urlSet = urlRepository.findAll().stream()
                 .map(Url::getShortenUrl)
                 .collect(Collectors.toSet());
@@ -83,6 +100,15 @@ public class UrlServiceImpl implements UrlService {
                 res = suffix.toString();
             } while (urlSet.contains(res));
         }
+        return res;
+    }
+
+
+    @Override
+    public UrlResponse createUrlForUser(String filteredUrl, UrlRequest request, String username) {
+        Optional<Url> url = urlRepository.findByOriginalUrl(request.originalUrl());
+        if (url.isPresent()) return new UrlResponse(url.get(), BASE_URL);
+        var res = shortenUrl(filteredUrl, request);
 
         Url newUrl = new Url();
         newUrl.setOriginalUrl(request.originalUrl());
@@ -97,7 +123,7 @@ public class UrlServiceImpl implements UrlService {
         newUrl.setExpires(LocalDate.now().plusYears(1));
 
         Url savedUrl = urlRepository.save(newUrl);
-        return new UrlResponse(savedUrl);
+        return new UrlResponse(savedUrl, BASE_URL);
     }
 
 
@@ -105,7 +131,7 @@ public class UrlServiceImpl implements UrlService {
     public UrlResponse createUrl(String filteredUrl, String originalUrl) {
 
         Optional<Url> url = urlRepository.findByOriginalUrl(originalUrl);
-        if (url.isPresent()) return new UrlResponse(url.get());
+        if (url.isPresent()) return new UrlResponse(url.get(),BASE_URL);
 
         Set<String> urlSet = urlRepository.findAll().stream()
                 .map(Url::getShortenUrl)
@@ -127,7 +153,7 @@ public class UrlServiceImpl implements UrlService {
         newUrl.setHitCount(0L);
 
         var save = urlRepository.save(newUrl);
-        return new UrlResponse(save);
+        return new UrlResponse(save, BASE_URL);
     }
 
 
@@ -145,7 +171,7 @@ public class UrlServiceImpl implements UrlService {
     @Override
     public UrlResponse findUrlById(int id) {
         var urlResponse = findById(id);
-        return new UrlResponse(urlResponse);
+        return new UrlResponse(urlResponse, BASE_URL);
     }
 
     @Override
@@ -153,7 +179,9 @@ public class UrlServiceImpl implements UrlService {
         Pageable pageable = PageRequest.of(0, 5, Sort.by("createdDate").descending());
         Page<Url> urlList = urlRepository.findUrlsByUserId(userid,pageable);
         var urlListByUserId = urlList.getContent();
-        return urlListByUserId.stream().map(UrlResponse::new).toList();
+        return urlListByUserId.stream()
+                .map((url) -> new UrlResponse(url, BASE_URL))
+                .toList();
     }
 
     @Override
@@ -174,7 +202,69 @@ public class UrlServiceImpl implements UrlService {
             url.setShortenUrl(request.suffix());
         }
         var updatedUrl = urlRepository.save(url);
-        return new UrlResponse(updatedUrl);
+        return new UrlResponse(updatedUrl, BASE_URL);
+    }
+
+
+    @Override
+    public byte[] generateAndSaveQRCode(String url, String title) throws WriterException,
+            IOException, URISyntaxException {
+
+        new URI(url).toURL();
+        var urlRequest = UrlRequest.builder()
+                .title(title)
+                .originalUrl(url)
+                .build();
+
+        var filteredUrl = filterUrl(urlRequest);
+        var res = shortenUrl(filteredUrl, urlRequest);
+
+
+        // Generate QR code
+        QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        BitMatrix bitMatrix = qrCodeWriter.encode(url, BarcodeFormat.QR_CODE, 250, 250);
+        BufferedImage bufferedImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(bufferedImage, "png", baos);
+        byte[] imageBytes = baos.toByteArray();
+
+        // Find or create URL entity
+        Url urlEntity = urlRepository.findByOriginalUrl(url)
+                .orElseGet(() -> {
+                    Url newUrl = new Url();
+                    newUrl.setOriginalUrl(url);
+                    newUrl.setTitle(title);
+                    newUrl.setShortenUrl(res);
+                    newUrl.setCreatedDate(Instant.now());
+                    newUrl.setLastModifiedDate(Instant.now());
+                    return urlRepository.save(newUrl);
+                });
+
+        // Save QR code
+        QRCode qrCode = urlEntity.getQrCode();
+        if (qrCode == null) {
+            qrCode = new QRCode();
+            qrCode.setQrCodeData(imageBytes);
+            qrCode.setUrl(urlEntity);
+            qrCodeRepository.save(qrCode);
+            urlEntity.setQrCode(qrCode);
+            urlRepository.save(urlEntity);
+        } else {
+            qrCode.setQrCodeData(imageBytes);
+            qrCodeRepository.save(qrCode);
+        }
+        return imageBytes;
+    }
+
+    @Override
+    public byte[] getQRCodeByUrlId(Integer urlId) {
+        Url url = urlRepository.findById(urlId)
+                .orElseThrow(() -> new ResourceNotFound("URL not found"));
+        QRCode qrCode = url.getQrCode();
+        if (qrCode == null || qrCode.getQrCodeData() == null) {
+            throw new RuntimeException("QR code not found for this URL");
+        }
+        return qrCode.getQrCodeData();
     }
 
     private Url findById(int id) {

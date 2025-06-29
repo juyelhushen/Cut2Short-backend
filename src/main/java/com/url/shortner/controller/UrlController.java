@@ -1,5 +1,6 @@
 package com.url.shortner.controller;
 
+import com.url.shortner.payload.QRCodeRequest;
 import com.url.shortner.payload.UrlRequest;
 import com.url.shortner.service.UrlService;
 import com.url.shortner.utils.APIResponse;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -93,5 +95,41 @@ public class UrlController {
         var response = urlService.updateUrl(request);
         var apiResponse = new APIResponse(true, Constant.DATA_UPDATE_SUCCESS, HttpStatus.OK.value(), response);
         return ResponseEntity.ok(apiResponse);
+    }
+
+    @PostMapping(value = "/generate", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> generateAndSaveQRCode(@RequestBody QRCodeRequest request) {
+        try {
+            byte[] qrCode = urlService.generateAndSaveQRCode(request.url(), request.title());
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_PNG)
+                    .body(qrCode);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping(value = "/get/{urlId}", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> getQRCode(@PathVariable Integer urlId) {
+        try {
+            byte[] qrCode = urlService.getQRCodeByUrlId(urlId);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_PNG)
+                    .body(qrCode);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/redirect")
+    public ResponseEntity<Void> redirectToUrl(@RequestParam("url") String url) {
+        try {
+            new java.net.URI(url).toURL();
+            return ResponseEntity.status(302)
+                    .header("Location", url)
+                    .build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

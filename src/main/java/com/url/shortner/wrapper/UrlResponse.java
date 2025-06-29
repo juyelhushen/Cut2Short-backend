@@ -16,14 +16,8 @@ public record UrlResponse(int id, String title, String originalUrl, String short
                           LocalDateTime updatedAt,
                           long hitCount
 ) {
-    private static String BASE_URL;
 
-    @Value("${app.base-url}")
-    public void setBaseUrl(String baseUrl) {
-        BASE_URL = baseUrl;
-    }
-
-    public UrlResponse(Url url) {
+    public UrlResponse(Url url, String BASE_URL) {
         this(url.getId(), url.getTitle(), url.getOriginalUrl(),
                 BASE_URL + url.getShortenUrl(),
                 url.getSuffix(),
