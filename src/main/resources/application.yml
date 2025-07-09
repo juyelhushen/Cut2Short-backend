@@ -10,7 +10,7 @@ spring:
   application:
     name: cut2short
   profiles:
-    active: dev
+    active: prod
 
   threads:
     virtual:
@@ -88,8 +88,13 @@ logging:
     sql: error
     org:
       hibernate:
+        sql: debug
         cache:
           spi: debug
+        type:
+          descriptor:
+            sql:
+              BasicBinder: trace
 
 #url
 url:

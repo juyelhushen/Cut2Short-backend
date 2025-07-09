@@ -4,12 +4,15 @@ C:\Users\cdac\IdeaProjects\url-shortner-app\src\main\java\com\url\shortner\contr
 C:\Users\cdac\IdeaProjects\url-shortner-app\src\main\java\com\url\shortner\controller\RedirectController.java
 C:\Users\cdac\IdeaProjects\url-shortner-app\src\main\java\com\url\shortner\controller\UrlController.java
 C:\Users\cdac\IdeaProjects\url-shortner-app\src\main\java\com\url\shortner\controller\UserController.java
+C:\Users\cdac\IdeaProjects\url-shortner-app\src\main\java\com\url\shortner\entity\QRCode.java
 C:\Users\cdac\IdeaProjects\url-shortner-app\src\main\java\com\url\shortner\entity\User.java
 C:\Users\cdac\IdeaProjects\url-shortner-app\src\main\java\com\url\shortner\exception\ErrorResponse.java
 C:\Users\cdac\IdeaProjects\url-shortner-app\src\main\java\com\url\shortner\exception\GlobalExceptionHandler.java
 C:\Users\cdac\IdeaProjects\url-shortner-app\src\main\java\com\url\shortner\exception\ResourceNotFound.java
+C:\Users\cdac\IdeaProjects\url-shortner-app\src\main\java\com\url\shortner\payload\QRCodeRequest.java
 C:\Users\cdac\IdeaProjects\url-shortner-app\src\main\java\com\url\shortner\payload\UrlRequest.java
 C:\Users\cdac\IdeaProjects\url-shortner-app\src\main\java\com\url\shortner\payload\UserRequest.java
+C:\Users\cdac\IdeaProjects\url-shortner-app\src\main\java\com\url\shortner\repository\QRCodeRepository.java
 C:\Users\cdac\IdeaProjects\url-shortner-app\src\main\java\com\url\shortner\repository\UrlRepository.java
 C:\Users\cdac\IdeaProjects\url-shortner-app\src\main\java\com\url\shortner\repository\UserRepository.java
 C:\Users\cdac\IdeaProjects\url-shortner-app\src\main\java\com\url\shortner\security\AuthEntryPoint.java

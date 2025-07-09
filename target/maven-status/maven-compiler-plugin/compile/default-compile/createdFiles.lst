@@ -1,4 +1,5 @@
 com\url\shortner\security\user\UserDetailImpl.class
+com\url\shortner\repository\QRCodeRepository.class
 com\url\shortner\wrapper\AuthResponse.class
 com\url\shortner\exception\ErrorResponse.class
 com\url\shortner\repository\UserRepository.class
@@ -7,6 +8,7 @@ com\url\shortner\payload\UserRequest.class
 com\url\shortner\utils\Constant.class
 com\url\shortner\UrlshortnerApplication.class
 com\url\shortner\aop\LoggingAspect.class
+com\url\shortner\payload\QRCodeRequest.class
 com\url\shortner\entity\User.class
 com\url\shortner\exception\ResourceNotFound.class
 com\url\shortner\service\UserService.class
@@ -20,11 +22,13 @@ com\url\shortner\controller\OAuthController.class
 com\url\shortner\security\user\CustomOAuth2UserService.class
 com\url\shortner\security\AuthFilter.class
 com\url\shortner\security\JwtUtils.class
+com\url\shortner\entity\QRCode.class
 com\url\shortner\service\imple\UserServiceImpl.class
 com\url\shortner\security\AuthEntryPoint.class
 com\url\shortner\service\UrlService.class
 com\url\shortner\security\user\UserDetailServiceImpl.class
 com\url\shortner\controller\UserController.class
+com\url\shortner\payload\UrlRequest$UrlRequestBuilder.class
 com\url\shortner\payload\UrlRequest.class
 com\url\shortner\exception\GlobalExceptionHandler.class
 com\url\shortner\config\SecurityConfiguration.class

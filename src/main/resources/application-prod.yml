@@ -1,7 +1,7 @@
 spring:
   datasource:
-    url: jdbc:postgresql://c2s.cd8ek2aasikq.ap-south-1.rds.amazonaws.com:5432/c2s
-    username: postgres
+    url: jdbc:postgresql://ep-lively-unit-a1pvq2yh-pooler.ap-southeast-1.aws.neon.tech:5432/neondb?sslmode=require
+    username: neondb_owner
     password: ${PASSWORD}
     driver-class-name: org.postgresql.Driver
 
