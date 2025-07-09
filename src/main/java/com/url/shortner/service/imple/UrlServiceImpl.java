@@ -16,7 +16,11 @@ import com.url.shortner.repository.UrlRepository;
 import com.url.shortner.repository.UserRepository;
 import com.url.shortner.service.UrlService;
 import com.url.shortner.wrapper.UrlResponse;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,7 +50,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class UrlServiceImpl implements UrlService {
@@ -55,6 +59,9 @@ public class UrlServiceImpl implements UrlService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final QRCodeRepository qrCodeRepository;
+    @PersistenceContext
+    private EntityManager entityManager;
+
 
     @Value("${app.base-url}")
     private String BASE_URL;
@@ -205,28 +212,41 @@ public class UrlServiceImpl implements UrlService {
         return new UrlResponse(updatedUrl, BASE_URL);
     }
 
-
     @Override
-    public byte[] generateAndSaveQRCode(String url, String title) throws WriterException,
-            IOException, URISyntaxException {
+    @Transactional
+    public byte[] generateAndSaveQRCode(String url, String title) throws URISyntaxException, WriterException {
+        // Enhanced validation
+        URI uri = new URI(url);
+        if (uri.getScheme() == null || (!"http".equalsIgnoreCase(uri.getScheme()) && !"https".equalsIgnoreCase(uri.getScheme()))) {
+            throw new URISyntaxException(url, "URL must use http or https scheme");
+        }
+        if (uri.getHost() == null || uri.getHost().trim().isEmpty()) {
+            throw new URISyntaxException(url, "URL must contain a valid host");
+        }
 
-        new URI(url).toURL();
         var urlRequest = UrlRequest.builder()
                 .title(title)
                 .originalUrl(url)
                 .build();
-
         var filteredUrl = filterUrl(urlRequest);
         var res = shortenUrl(filteredUrl, urlRequest);
-
 
         // Generate QR code
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         BitMatrix bitMatrix = qrCodeWriter.encode(url, BarcodeFormat.QR_CODE, 250, 250);
         BufferedImage bufferedImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(bufferedImage, "png", baos);
-        byte[] imageBytes = baos.toByteArray();
+        byte[] imageBytes;
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            ImageIO.write(bufferedImage, "png", baos);
+            imageBytes = baos.toByteArray();
+            System.out.println("After ImageIO.write - imageBytes type: " + imageBytes.getClass().getName());
+            System.out.println("After ImageIO.write - imageBytes length: " + imageBytes.length);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to write QR code image: " + e.getMessage(), e);
+        }
+
+        System.out.println("Before QRCode assignment - imageBytes type: " + imageBytes.getClass().getName());
+        System.out.println("Before QRCode assignment - imageBytes length: " + imageBytes.length);
 
         // Find or create URL entity
         Url urlEntity = urlRepository.findByOriginalUrl(url)
@@ -240,19 +260,26 @@ public class UrlServiceImpl implements UrlService {
                     return urlRepository.save(newUrl);
                 });
 
-        // Save QR code
+        // Save QR code using native query
         QRCode qrCode = urlEntity.getQrCode();
         if (qrCode == null) {
-            qrCode = new QRCode();
-            qrCode.setQrCodeData(imageBytes);
-            qrCode.setUrl(urlEntity);
-            qrCodeRepository.save(qrCode);
+            Query query = entityManager.createNativeQuery(
+                    "INSERT INTO qr_code (id, created_date, qr_code_data, url_id) VALUES (nextval('qr_code_sequence'), ?, ?, ?)"
+            );
+            query.setParameter(1, Instant.now());
+            query.setParameter(2, imageBytes);
+            query.setParameter(3, urlEntity.getId());
+            query.executeUpdate();
+            Long newId = (Long) entityManager.createNativeQuery("SELECT currval('qr_code_sequence')").getSingleResult();
+            qrCode = qrCodeRepository.findById(newId).orElseThrow(() -> new RuntimeException("Failed to retrieve new QRCode"));
             urlEntity.setQrCode(qrCode);
             urlRepository.save(urlEntity);
         } else {
             qrCode.setQrCodeData(imageBytes);
             qrCodeRepository.save(qrCode);
+            urlRepository.save(urlEntity);
         }
+
         return imageBytes;
     }
 
