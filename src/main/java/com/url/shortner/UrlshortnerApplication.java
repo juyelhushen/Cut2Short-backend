@@ -29,7 +29,7 @@ import java.net.http.HttpResponse;
 
 @SpringBootApplication
 @OpenAPIDefinition(info =
-@Info(title = "Url Shortner's API", version = "1.0", description = "Documentation Authentication API v1.0"))
+@Info(title = "Cut@Short's APIs", version = "1.0", description = "Documentation Authentication API v1.0"))
 @EnableScheduling
 public class UrlshortnerApplication {
 

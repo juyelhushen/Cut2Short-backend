@@ -1,14 +1,11 @@
 package com.url.shortner.service.imple;
 
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.WriterException;
-import com.google.zxing.client.j2se.MatrixToImageWriter;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.QRCodeWriter;
+
 import com.url.shortner.entity.QRCode;
 import com.url.shortner.entity.Url;
 import com.url.shortner.entity.User;
 import com.url.shortner.exception.ResourceNotFound;
+import com.url.shortner.payload.QRCodeRequest;
 import com.url.shortner.payload.UrlRequest;
 import com.url.shortner.payload.UserRequest;
 import com.url.shortner.repository.QRCodeRepository;
@@ -138,7 +135,7 @@ public class UrlServiceImpl implements UrlService {
     public UrlResponse createUrl(String filteredUrl, String originalUrl) {
 
         Optional<Url> url = urlRepository.findByOriginalUrl(originalUrl);
-        if (url.isPresent()) return new UrlResponse(url.get(),BASE_URL);
+        if (url.isPresent()) return new UrlResponse(url.get(), BASE_URL);
 
         Set<String> urlSet = urlRepository.findAll().stream()
                 .map(Url::getShortenUrl)
@@ -184,7 +181,7 @@ public class UrlServiceImpl implements UrlService {
     @Override
     public List<UrlResponse> findAllUrlByUserId(int userid) {
         Pageable pageable = PageRequest.of(0, 5, Sort.by("createdDate").descending());
-        Page<Url> urlList = urlRepository.findUrlsByUserId(userid,pageable);
+        Page<Url> urlList = urlRepository.findUrlsByUserId(userid, pageable);
         var urlListByUserId = urlList.getContent();
         return urlListByUserId.stream()
                 .map((url) -> new UrlResponse(url, BASE_URL))
@@ -212,86 +209,16 @@ public class UrlServiceImpl implements UrlService {
         return new UrlResponse(updatedUrl, BASE_URL);
     }
 
-    @Override
-    @Transactional
-    public byte[] generateAndSaveQRCode(String url, String title) throws URISyntaxException, WriterException {
-        // Enhanced validation
-        URI uri = new URI(url);
-        if (uri.getScheme() == null || (!"http".equalsIgnoreCase(uri.getScheme()) && !"https".equalsIgnoreCase(uri.getScheme()))) {
-            throw new URISyntaxException(url, "URL must use http or https scheme");
-        }
-        if (uri.getHost() == null || uri.getHost().trim().isEmpty()) {
-            throw new URISyntaxException(url, "URL must contain a valid host");
-        }
-
-        var urlRequest = UrlRequest.builder()
-                .title(title)
-                .originalUrl(url)
-                .build();
-        var filteredUrl = filterUrl(urlRequest);
-        var res = shortenUrl(filteredUrl, urlRequest);
-
-        // Generate QR code
-        QRCodeWriter qrCodeWriter = new QRCodeWriter();
-        BitMatrix bitMatrix = qrCodeWriter.encode(url, BarcodeFormat.QR_CODE, 250, 250);
-        BufferedImage bufferedImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
-        byte[] imageBytes;
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            ImageIO.write(bufferedImage, "png", baos);
-            imageBytes = baos.toByteArray();
-            System.out.println("After ImageIO.write - imageBytes type: " + imageBytes.getClass().getName());
-            System.out.println("After ImageIO.write - imageBytes length: " + imageBytes.length);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to write QR code image: " + e.getMessage(), e);
-        }
-
-        System.out.println("Before QRCode assignment - imageBytes type: " + imageBytes.getClass().getName());
-        System.out.println("Before QRCode assignment - imageBytes length: " + imageBytes.length);
-
-        // Find or create URL entity
-        Url urlEntity = urlRepository.findByOriginalUrl(url)
-                .orElseGet(() -> {
-                    Url newUrl = new Url();
-                    newUrl.setOriginalUrl(url);
-                    newUrl.setTitle(title);
-                    newUrl.setShortenUrl(res);
-                    newUrl.setCreatedDate(Instant.now());
-                    newUrl.setLastModifiedDate(Instant.now());
-                    return urlRepository.save(newUrl);
-                });
-
-        // Save QR code using native query
-        QRCode qrCode = urlEntity.getQrCode();
-        if (qrCode == null) {
-            Query query = entityManager.createNativeQuery(
-                    "INSERT INTO qr_code (id, created_date, qr_code_data, url_id) VALUES (nextval('qr_code_sequence'), ?, ?, ?)"
-            );
-            query.setParameter(1, Instant.now());
-            query.setParameter(2, imageBytes);
-            query.setParameter(3, urlEntity.getId());
-            query.executeUpdate();
-            Long newId = (Long) entityManager.createNativeQuery("SELECT currval('qr_code_sequence')").getSingleResult();
-            qrCode = qrCodeRepository.findById(newId).orElseThrow(() -> new RuntimeException("Failed to retrieve new QRCode"));
-            urlEntity.setQrCode(qrCode);
-            urlRepository.save(urlEntity);
-        } else {
-            qrCode.setQrCodeData(imageBytes);
-            qrCodeRepository.save(qrCode);
-            urlRepository.save(urlEntity);
-        }
-
-        return imageBytes;
-    }
 
     @Override
     public byte[] getQRCodeByUrlId(Integer urlId) {
-        Url url = urlRepository.findById(urlId)
+        var url = urlRepository.findById(urlId)
                 .orElseThrow(() -> new ResourceNotFound("URL not found"));
-        QRCode qrCode = url.getQrCode();
-        if (qrCode == null || qrCode.getQrCodeData() == null) {
+        var qrCode = url.getQrCode();
+        if (qrCode == null || qrCode.getQrCode() == null)
             throw new RuntimeException("QR code not found for this URL");
-        }
-        return qrCode.getQrCodeData();
+
+        return qrCode.getQrCode();
     }
 
     private Url findById(int id) {
@@ -303,4 +230,41 @@ public class UrlServiceImpl implements UrlService {
                 .orElseThrow(() -> new ResourceNotFound("User not found with email: " + email));
     }
 
+    private Url findByOriginalUrl(String originalUrl) {
+        return urlRepository.findByOriginalUrl(originalUrl)
+                .orElse(null);
+    }
+
+    private QRCode findQrCodeById(Long id) {
+        return qrCodeRepository.findById(id)
+                .orElse(null);
+    }
+
+    @Override
+    public QRCodeRequest saveQRCode(QRCodeRequest request) {
+        Url url = new Url();
+//        if (url == null) url = new Url();
+        url.setOriginalUrl(request.url());
+
+        QRCode code = new QRCode();
+//        if (code == null) code = new QRCode();
+        code.setUrl(url);
+
+        byte[] qrCodeBytes = Base64.getDecoder()
+                .decode(request.qrCodeBase64());
+
+        code.setQrCode(qrCodeBytes);
+        url.setQrCode(code);
+        url.setHitCount(0L);
+        url.setTitle(request.title());
+        url.setExpires(LocalDate.now().plusYears(1));
+
+        var username = SecurityContextHolder.getContext().getAuthentication().getName();
+        var user  = findByUsername(username);
+
+        url.setUser(user);
+        Url saveUrl = urlRepository.save(url);
+
+        return new QRCodeRequest(saveUrl);
+    }
 }
