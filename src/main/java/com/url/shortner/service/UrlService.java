@@ -1,6 +1,6 @@
 package com.url.shortner.service;
 
-import com.google.zxing.WriterException;
+import com.url.shortner.payload.QRCodeRequest;
 import com.url.shortner.payload.UrlRequest;
 import com.url.shortner.payload.UserRequest;
 import com.url.shortner.wrapper.UrlResponse;
@@ -31,6 +31,7 @@ public interface UrlService {
 
     UrlResponse findUrlById(int id);
 
-    byte[] generateAndSaveQRCode(String url, String title) throws WriterException, IOException, URISyntaxException;
     byte[] getQRCodeByUrlId(Integer urlId);
+
+    QRCodeRequest saveQRCode(QRCodeRequest request);
 }

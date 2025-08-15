@@ -97,15 +97,28 @@ public class UrlController {
         return ResponseEntity.ok(apiResponse);
     }
 
-    @PostMapping(value = "/generate", produces = MediaType.IMAGE_PNG_VALUE)
-    public ResponseEntity<byte[]> generateAndSaveQRCode(@RequestBody QRCodeRequest request) {
+//    @PostMapping(value = "/generate", produces = MediaType.IMAGE_PNG_VALUE)
+//    public ResponseEntity<byte[]> generateAndSaveQRCode(@RequestBody QRCodeRequest request) {
+//        try {
+//            byte[] qrCode = urlService.generateAndSaveQRCode(request.url(), request.title());
+//            return ResponseEntity.ok()
+//                    .contentType(MediaType.IMAGE_PNG)
+//                    .body(qrCode);
+//        } catch (Exception e) {
+//            return ResponseEntity.badRequest().build();
+//        }
+//    }
+
+
+//    @PreAuthorize("hasRole('USER')")
+    @PostMapping("/generate")
+    public ResponseEntity<APIResponse> createQRCode(@RequestBody QRCodeRequest request) {
         try {
-            byte[] qrCode = urlService.generateAndSaveQRCode(request.url(), request.title());
-            return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_PNG)
-                    .body(qrCode);
+            QRCodeRequest savedQRCode = urlService.saveQRCode(request);
+            APIResponse response = new APIResponse(true, Constant.QR_GENERATED, HttpStatus.OK.value(), savedQRCode);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            throw new RuntimeException(e.getMessage());
         }
     }
 
