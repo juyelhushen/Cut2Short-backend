@@ -5,6 +5,7 @@ import com.url.shortner.payload.UrlRequest;
 import com.url.shortner.service.UrlService;
 import com.url.shortner.utils.APIResponse;
 import com.url.shortner.utils.Constant;
+import com.url.shortner.wrapper.QRCodeResponse;
 import com.url.shortner.wrapper.UrlResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -143,6 +144,19 @@ public class UrlController {
                     .build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @GetMapping("/qrcode/list/{userid}")
+    public ResponseEntity<APIResponse> getQRCodeList(@PathVariable int userid) {
+        try {
+            List<QRCodeResponse> codeResponsesList = urlService.getQrCodeList(userid);
+            APIResponse response = new APIResponse(true, Constant.DATA_FETCH_SUCCESS, HttpStatus.OK.value(), codeResponsesList);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
 }

@@ -3,6 +3,7 @@ package com.url.shortner.service;
 import com.url.shortner.payload.QRCodeRequest;
 import com.url.shortner.payload.UrlRequest;
 import com.url.shortner.payload.UserRequest;
+import com.url.shortner.wrapper.QRCodeResponse;
 import com.url.shortner.wrapper.UrlResponse;
 
 import java.io.IOException;
@@ -34,4 +35,6 @@ public interface UrlService {
     byte[] getQRCodeByUrlId(Integer urlId);
 
     QRCodeRequest saveQRCode(QRCodeRequest request);
+
+    List<QRCodeResponse> getQrCodeList(int userid);
 }
