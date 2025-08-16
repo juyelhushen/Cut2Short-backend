@@ -2,7 +2,6 @@ package com.url.shortner.wrapper;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.url.shortner.entity.Url;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;

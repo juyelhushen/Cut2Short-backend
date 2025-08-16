@@ -10,7 +10,7 @@ spring:
   application:
     name: cut2short
   profiles:
-    active: dev
+    active: prod
 
   threads:
     virtual:

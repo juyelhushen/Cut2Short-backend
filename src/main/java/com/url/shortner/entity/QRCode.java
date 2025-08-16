@@ -5,9 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.domain.Auditable;
+import org.hibernate.annotations.JdbcTypeCode;
 
-import java.time.Instant;
+import java.sql.Types;
 
 @Setter
 @Getter
@@ -15,7 +15,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "qr_code", schema = "public")
-public class QRCode{
+public class QRCode {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "qr_code_seq")
@@ -23,6 +23,8 @@ public class QRCode{
     private Long id;
 
     @Lob
+    @Basic(fetch = FetchType.EAGER)
+    @JdbcTypeCode(Types.BINARY)
     @Column(name = "qr_code", nullable = false)
     private byte[] qrCode;
 

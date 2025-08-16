@@ -1,5 +1,6 @@
 package com.url.shortner.entity
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.*
 import org.hibernate.annotations.Cache
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -8,8 +9,8 @@ import java.time.LocalDate
 
 @Entity
 @Table(name = "url", schema = "public", indexes = [Index(name = "shortenUrlIdx", columnList = "shortenUrl")])
-@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "urlDetailsCache")
-data class Url(
+//@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "urlDetailsCache")
+data class  Url(
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "url_seq")
@@ -27,6 +28,7 @@ data class Url(
     @JoinColumn(name = "user_id")
     var user: User? = null,
 
+    @JsonIgnore
     @OneToOne(cascade = [CascadeType.ALL], fetch = FetchType.LAZY, mappedBy = "url")
     var qrCode: QRCode? = null
 

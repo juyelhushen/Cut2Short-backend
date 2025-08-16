@@ -7,15 +7,14 @@ import com.url.shortner.entity.User;
 import com.url.shortner.exception.ResourceNotFound;
 import com.url.shortner.payload.QRCodeRequest;
 import com.url.shortner.payload.UrlRequest;
-import com.url.shortner.payload.UserRequest;
 import com.url.shortner.repository.QRCodeRepository;
 import com.url.shortner.repository.UrlRepository;
 import com.url.shortner.repository.UserRepository;
 import com.url.shortner.service.UrlService;
+import com.url.shortner.wrapper.QRCodeResponse;
 import com.url.shortner.wrapper.UrlResponse;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -25,7 +24,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -266,5 +264,16 @@ public class UrlServiceImpl implements UrlService {
         Url saveUrl = urlRepository.save(url);
 
         return new QRCodeRequest(saveUrl);
+    }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<QRCodeResponse> getQrCodeList(int userid) {
+        return qrCodeRepository.findByUrlUserId(userid)
+                .stream()
+                .map(QRCodeResponse::new)
+                .toList();
+
     }
 }
