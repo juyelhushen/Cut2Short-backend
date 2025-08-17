@@ -119,20 +119,32 @@ public class SecurityConfiguration {
         return config.getAuthenticationManager();
     }
 
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.addAllowedHeader("*");
-        configuration.addAllowedOriginPattern(corsUrl);
-        configuration.setAllowCredentials(true);
-//        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000", "https://cut2short-front.onrender.com"));
-        configuration.setMaxAge(3600L);
+        configuration.setAllowedOrigins(List.of("https://cut2short-front.onrender.com")); // frontend URL
+        configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS","PATCH"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true); // important
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
+
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+//        configuration.addAllowedHeader("*");
+//        configuration.addAllowedOriginPattern(corsUrl);
+//        configuration.setAllowCredentials(true);
+////        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000", "https://cut2short-front.onrender.com"));
+//        configuration.setMaxAge(3600L);
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", configuration);
+//        return source;
+//    }
 
 
     @Bean
