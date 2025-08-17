@@ -4,8 +4,11 @@ import com.url.shortner.entity.Role;
 import com.url.shortner.entity.User;
 import com.url.shortner.repository.UserRepository;
 import com.url.shortner.security.JwtUtils;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -15,7 +18,10 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -67,7 +73,20 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                             return savedUser;
                         }));
 
-        var token = jwtUtils.generateFromOAuth2User(email, Role.USER);
+        var token = jwtUtils.generateFromOAuth2User(user.getEmail(), user.getRole());
+
+        // 🔑 Store JWT in HttpOnly cookie
+        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+        if (response != null) {
+            ResponseCookie cookie = ResponseCookie.from("AUTH-TOKEN", token)
+                    .httpOnly(true)
+                    .secure(false) // ❌ keep false for local dev, ✅ set true in production
+                    .sameSite("Lax") // or "Strict" for extra security
+                    .path("/")
+                    .maxAge(Duration.ofDays(7))
+                    .build();
+            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        }
 
         Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
         attributes.put("token", token);

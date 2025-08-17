@@ -1,6 +1,9 @@
 package com.url.shortner.controller;
 
+import com.url.shortner.entity.User;
 import com.url.shortner.payload.UserRequest;
+import com.url.shortner.repository.UserRepository;
+import com.url.shortner.security.JwtUtils;
 import com.url.shortner.security.user.CustomOAuth2UserService;
 import com.url.shortner.service.UserService;
 import com.url.shortner.utils.APIResponse;
@@ -23,6 +26,8 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final JwtUtils jwtUtils;
+    private final UserRepository userRepository;
 
     @PostMapping("/register")
     public ResponseEntity<APIResponse> register(@RequestBody UserRequest request) {
@@ -36,5 +41,20 @@ public class UserController {
         AuthResponse response = userService.login(request);
         APIResponse apiResponse = new APIResponse(true, Constant.LOGIN_SUCCESS, HttpStatus.OK.value(), response);
         return ResponseEntity.ok(apiResponse);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> me(@CookieValue(name = "AUTH-TOKEN", required = false) String token) {
+        if (token == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No auth token");
+
+        String email = jwtUtils.extractUsername(token);
+        User user = userRepository.findByEmail(email).orElseThrow();
+        return ResponseEntity.ok(Map.of(
+                "userId", user.getId(),
+                "email", user.getEmail(),
+                "name", user.getFirstName() + " " + user.getLastName(),
+                "profile", user.getImageUrl(),
+                "role", user.getRole()
+        ));
     }
 }
