@@ -122,30 +122,14 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("https://cut2short-front.onrender.com")); // frontend URL
+        configuration.setAllowedOrigins(List.of(corsUrl)); // frontend URL from properties
         configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS","PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true); // important
+        configuration.setAllowCredentials(true); // important for HttpOnly cookie
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
-
-//    @Bean
-//    public CorsConfigurationSource corsConfigurationSource() {
-//        CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-//        configuration.addAllowedHeader("*");
-//        configuration.addAllowedOriginPattern(corsUrl);
-//        configuration.setAllowCredentials(true);
-////        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000", "https://cut2short-front.onrender.com"));
-//        configuration.setMaxAge(3600L);
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", configuration);
-//        return source;
-//    }
-
 
     @Bean
     public OpenAPI customizeOpenAPI() {

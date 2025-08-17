@@ -4,6 +4,7 @@ import com.url.shortner.entity.Role;
 import com.url.shortner.entity.User;
 import com.url.shortner.repository.UserRepository;
 import com.url.shortner.security.JwtUtils;
+import com.url.shortner.security.cookie.CookieService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
+    private final CookieService cookieService;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -76,16 +78,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         var token = jwtUtils.generateFromOAuth2User(user.getEmail(), user.getRole());
 
-        // 🔑 Store JWT in HttpOnly cookie
-        HttpServletResponse response = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getResponse();
+        // Set cookie using environment-specific implementation
+        HttpServletResponse response = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes()))
+                .getResponse();
         if (response != null) {
-            ResponseCookie cookie = ResponseCookie.from("AUTH-TOKEN", token)
-                    .httpOnly(true)
-                    .secure(true) // ❌ keep false for local dev, ✅ set true in production
-                    .sameSite("None") // or "Strict" for extra security
-                    .path("/")
-                    .maxAge(Duration.ofDays(7))
-                    .build();
+            ResponseCookie cookie = cookieService.createCookie(token);
             response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         }
 
