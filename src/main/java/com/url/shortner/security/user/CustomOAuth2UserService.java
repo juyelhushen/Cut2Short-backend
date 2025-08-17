@@ -80,7 +80,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         if (response != null) {
             ResponseCookie cookie = ResponseCookie.from("AUTH-TOKEN", token)
                     .httpOnly(true)
-                    .secure(false) // ❌ keep false for local dev, ✅ set true in production
+                    .secure(true) // ❌ keep false for local dev, ✅ set true in production
                     .sameSite("Lax") // or "Strict" for extra security
                     .path("/")
                     .maxAge(Duration.ofDays(7))
