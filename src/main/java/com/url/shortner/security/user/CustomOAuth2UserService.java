@@ -25,6 +25,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -76,7 +77,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         var token = jwtUtils.generateFromOAuth2User(user.getEmail(), user.getRole());
 
         // 🔑 Store JWT in HttpOnly cookie
-        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+        HttpServletResponse response = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes())).getResponse();
         if (response != null) {
             ResponseCookie cookie = ResponseCookie.from("AUTH-TOKEN", token)
                     .httpOnly(true)

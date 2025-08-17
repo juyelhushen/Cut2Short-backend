@@ -125,9 +125,9 @@ public class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.addAllowedHeader("*");
-//        configuration.addAllowedOriginPattern(corsUrl);
+        configuration.addAllowedOriginPattern(corsUrl);
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000", "https://cut2short-front.onrender.com"));
+//        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000", "https://cut2short-front.onrender.com"));
         configuration.setMaxAge(3600L);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
