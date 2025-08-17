@@ -6,11 +6,15 @@ import com.url.shortner.payload.UserRequest;
 import com.url.shortner.repository.UserRepository;
 import com.url.shortner.security.AuthFilter;
 import com.url.shortner.security.JwtUtils;
+import com.url.shortner.security.cookie.CookieService;
 import com.url.shortner.service.UserService;
 import com.url.shortner.wrapper.AuthResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,7 +23,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -32,7 +39,7 @@ public class UserServiceImpl implements UserService {
     private final AuthFilter authFilter;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
-
+    private final CookieService cookieService;
 
     @Override
     public AuthResponse register(UserRequest request) {
@@ -45,7 +52,17 @@ public class UserServiceImpl implements UserService {
             SecurityContextHolder.getContext().setAuthentication(auth);
 
             String token = jwtUtils.generate(savedUser.getId(), savedUser.getEmail(), Role.USER);
-            return new AuthResponse(savedUser.getId(),savedUser.getFullName(), savedUser.getEmail(), token, savedUser.getImageUrl());
+
+            HttpServletResponse httpResponse = ((ServletRequestAttributes) Objects.requireNonNull(
+                    RequestContextHolder.getRequestAttributes()))
+                    .getResponse();
+
+            if (token != null && httpResponse != null) {
+                ResponseCookie cookie = cookieService.createCookie(token);
+                httpResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+            }
+
+            return new AuthResponse(savedUser.getId(), savedUser.getFullName(), savedUser.getEmail(), savedUser.getImageUrl(), savedUser.getRole());
 
         }
         return null;
@@ -64,7 +81,17 @@ public class UserServiceImpl implements UserService {
                 User user = findByUsername(request.email());
                 SecurityContextHolder.getContext().setAuthentication(auth);
                 String token = jwtUtils.generate(user.getId(), user.getEmail(), Role.USER);
-                return new AuthResponse(user.getId(),user.getFullName(), user.getEmail(), token, user.getImageUrl());
+
+                HttpServletResponse httpResponse = ((ServletRequestAttributes) Objects.requireNonNull(
+                        RequestContextHolder.getRequestAttributes()))
+                        .getResponse();
+
+                if (token != null && httpResponse != null) {
+                    ResponseCookie cookie = cookieService.createCookie(token);
+                    httpResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+                }
+
+                return new AuthResponse(user.getId(), user.getFullName(), user.getEmail(), user.getImageUrl(), user.getRole());
             }
 
             return null;

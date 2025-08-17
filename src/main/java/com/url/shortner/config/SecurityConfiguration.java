@@ -60,6 +60,7 @@ public class SecurityConfiguration {
             "/api/user/me",
             "/api/v1/url/shorten",
             "/api/user/login",
+            "/api/user/logout",
             "/api/user/register",
             "/oauth2/callback",
             "/oauth2/**",
