@@ -9,8 +9,9 @@ server:
 spring:
   application:
     name: cut2short
+
   profiles:
-    active: prod
+    active: dev
 
   threads:
     virtual:
