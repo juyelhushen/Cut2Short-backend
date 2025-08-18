@@ -20,10 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -176,14 +173,25 @@ public class UrlServiceImpl implements UrlService {
         return new UrlResponse(urlResponse, BASE_URL);
     }
 
+
     @Override
-    public List<UrlResponse> findAllUrlByUserId(int userid) {
-        Pageable pageable = PageRequest.of(0, 5, Sort.by("createdDate").descending());
+    public Page<UrlResponse> findAllUrlByUserId(int userid, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<Url> urlList = urlRepository.findUrlsByUserId(userid, pageable);
-        var urlListByUserId = urlList.getContent();
-        return urlListByUserId.stream()
-                .map((url) -> new UrlResponse(url, BASE_URL))
+        Page<UrlResponse> responsePage = urlList
+                .map(url -> {
+                    if (!url.getShortenUrl().isBlank()) {
+                        return new UrlResponse(url, BASE_URL);
+                    }
+                    return null;
+                });
+
+        List<UrlResponse> filteredList = responsePage.getContent()
+                .stream()
+                .filter(Objects::nonNull)
                 .toList();
+
+        return new PageImpl<>(filteredList, pageable, filteredList.size());
     }
 
     @Override

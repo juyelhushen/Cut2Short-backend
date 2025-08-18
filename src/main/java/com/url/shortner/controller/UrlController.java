@@ -36,7 +36,7 @@ public class UrlController {
         return ResponseEntity.ok(responses);
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @PostMapping("/shorten/set")
     public ResponseEntity<APIResponse> createUrl(@RequestBody UrlRequest request) {
         var username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -52,6 +52,7 @@ public class UrlController {
     }
 
 
+
     @PostMapping("/shorten")
     public ResponseEntity<APIResponse> createdUrl(@RequestBody UrlRequest request) {
         try {
@@ -64,10 +65,15 @@ public class UrlController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping("/get/{userId}")
-    public ResponseEntity<APIResponse> getUrlByUserId(@PathVariable int userId) {
+    public ResponseEntity<APIResponse> getUrlByUserId(
+            @PathVariable int userId,
+            @RequestParam(defaultValue = "0",name = "page") int page,
+            @RequestParam(defaultValue = "5", name = "size") int size
+    ) {
         try {
-            var response = urlService.findAllUrlByUserId(userId);
+            var response = urlService.findAllUrlByUserId(userId, page, size);
             var apiResponse = new APIResponse(true, Constant.DATA_FETCH_SUCCESS, HttpStatus.OK.value(), response);
             return ResponseEntity.ok(apiResponse);
         } catch (Exception e) {
@@ -75,6 +81,7 @@ public class UrlController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<APIResponse> getUrlById(@PathVariable int id) {
         var response = urlService.findUrlById(id);
@@ -82,6 +89,8 @@ public class UrlController {
         return ResponseEntity.ok(apiResponse);
     }
 
+
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<APIResponse> deleteUrl(@PathVariable int id) {
         var response = urlService.deleteUrlById(id);
@@ -91,6 +100,7 @@ public class UrlController {
         return ResponseEntity.ok(apiResponse);
     }
 
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @PatchMapping("/update")
     public ResponseEntity<APIResponse> updateUrl(@RequestBody UrlRequest request) {
         var response = urlService.updateUrl(request);
@@ -111,7 +121,7 @@ public class UrlController {
 //    }
 
 
-//    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @PostMapping("/generate")
     public ResponseEntity<APIResponse> createQRCode(@RequestBody QRCodeRequest request) {
         try {
