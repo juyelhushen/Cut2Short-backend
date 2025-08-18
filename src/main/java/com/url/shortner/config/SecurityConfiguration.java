@@ -123,7 +123,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(corsUrl)); // frontend URL from properties
+        configuration.setAllowedOrigins(List.of("https://cut2short-front.onrender.com")); // frontend URL from properties
         configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS","PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true); // important for HttpOnly cookie
