@@ -5,6 +5,7 @@ import com.url.shortner.payload.UrlRequest;
 import com.url.shortner.payload.UserRequest;
 import com.url.shortner.wrapper.QRCodeResponse;
 import com.url.shortner.wrapper.UrlResponse;
+import org.springframework.data.domain.Page;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -24,7 +25,8 @@ public interface UrlService {
     //    public String shortenUrl(UrlRequest request) throws NoSuchAlgorithmException;
     CompletableFuture<String> getOriginalUrl(String shortUrl);
 
-    List<UrlResponse> findAllUrlByUserId(int userId);
+    //    List<UrlResponse> findAllUrlByUserId(int userId);
+    Page<UrlResponse> findAllUrlByUserId(int userId, int page, int size);
 
     boolean deleteUrlById(int id);
 

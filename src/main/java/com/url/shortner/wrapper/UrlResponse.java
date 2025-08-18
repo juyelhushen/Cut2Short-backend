@@ -9,9 +9,9 @@ import java.util.Objects;
 
 public record UrlResponse(int id, String title, String originalUrl, String shortenUrl,
                           String suffix,
-                          @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
+                          @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd MMM, yyyy")
                           LocalDateTime createdAt,
-                          @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
+                          @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd MMM, yyyy")
                           LocalDateTime updatedAt,
                           long hitCount
 ) {
