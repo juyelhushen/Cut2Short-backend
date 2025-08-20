@@ -121,6 +121,13 @@ public class UrlServiceImpl implements UrlService {
 
         newUrl.setExpires(LocalDate.now().plusYears(1));
 
+        if(Objects.nonNull(request.qrCodeData())) {
+            QRCode qrCode = new QRCode();
+            qrCode.setUrl(newUrl);
+            qrCode.setQrCode(Base64.getDecoder().decode(request.qrCodeData()));
+            newUrl.setQrCode(qrCode);
+        }
+
         Url savedUrl = urlRepository.save(newUrl);
         return new UrlResponse(savedUrl, BASE_URL);
     }
@@ -248,12 +255,25 @@ public class UrlServiceImpl implements UrlService {
 
     @Override
     public QRCodeRequest saveQRCode(QRCodeRequest request) {
+        var username = SecurityContextHolder.getContext().getAuthentication().getName();
         Url url = new Url();
-//        if (url == null) url = new Url();
         url.setOriginalUrl(request.url());
 
+        if (request.generateShortLink()) {
+            UrlRequest urlRequest = UrlRequest
+                    .builder()
+                    .originalUrl(request.url())
+                    .email(username)
+                    .build();
+
+            var filteredUrl = filterUrl(urlRequest);
+            Optional<Url> optionalUrl = urlRepository.findByOriginalUrl(request.url());
+            String shortenUrl = optionalUrl.map(Url::getShortenUrl)
+                    .orElseGet(() -> shortenUrl(filteredUrl, urlRequest));
+            url.setShortenUrl(shortenUrl);
+        }
+
         QRCode code = new QRCode();
-//        if (code == null) code = new QRCode();
         code.setUrl(url);
 
         byte[] qrCodeBytes = Base64.getDecoder()
@@ -265,7 +285,6 @@ public class UrlServiceImpl implements UrlService {
         url.setTitle(request.title());
         url.setExpires(LocalDate.now().plusYears(1));
 
-        var username = SecurityContextHolder.getContext().getAuthentication().getName();
         var user  = findByUsername(username);
 
         url.setUser(user);
@@ -277,11 +296,24 @@ public class UrlServiceImpl implements UrlService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<QRCodeResponse> getQrCodeList(int userid) {
-        return qrCodeRepository.findByUrlUserId(userid)
+    public Page<QRCodeResponse> getQrCodeList(int userid, int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
+        Page<Url> urlList = urlRepository.findUrlsByUserId(userid, pageable);
+        Page<QRCodeResponse> responsePage = urlList
+                .map(url -> {
+                    if (Objects.nonNull(url.getQrCode())) {
+                        return new QRCodeResponse(url);
+                    }
+                    return null;
+                });
+
+        List<QRCodeResponse> filteredList = responsePage.getContent()
                 .stream()
-                .map(QRCodeResponse::new)
+                .filter(Objects::nonNull)
                 .toList();
+
+        return  new PageImpl<>(filteredList, pageable, filteredList.size());
 
     }
 }

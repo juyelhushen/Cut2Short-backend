@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDateTime;
 
 public record ErrorResponse(String error, int code,
-                            @JsonFormat(pattern = "yyyy-MM-dd hh:mm:ss")
+                            @JsonFormat(pattern = "dd MMM, yyyy hh:mm:ss")
                             LocalDateTime timestamp) {
 
     public ErrorResponse(String error,  int code) {

@@ -5,6 +5,7 @@ import com.url.shortner.entity.Url;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Base64;
 import java.util.Objects;
 
 public record UrlResponse(int id, String title, String originalUrl, String shortenUrl,
@@ -13,7 +14,8 @@ public record UrlResponse(int id, String title, String originalUrl, String short
                           LocalDateTime createdAt,
                           @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd MMM, yyyy")
                           LocalDateTime updatedAt,
-                          long hitCount
+                          long hitCount,
+                          String qrBase64Code
 ) {
 
     public UrlResponse(Url url, String BASE_URL) {
@@ -22,7 +24,8 @@ public record UrlResponse(int id, String title, String originalUrl, String short
                 url.getSuffix(),
                 LocalDateTime.ofInstant(Objects.requireNonNull(url.getCreatedDate()), ZoneId.of("UTC")),
                 LocalDateTime.ofInstant(Objects.requireNonNull(url.getLastModifiedDate()), ZoneId.of("UTC")),
-                url.getHitCount()
+                url.getHitCount(),
+                url.getQrCode() != null ? Base64.getEncoder().encodeToString(url.getQrCode().getQrCode()) : ""
         );
     }
 }
