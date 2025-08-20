@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +53,6 @@ public class UrlController {
     }
 
 
-
     @PostMapping("/shorten")
     public ResponseEntity<APIResponse> createdUrl(@RequestBody UrlRequest request) {
         try {
@@ -69,7 +69,7 @@ public class UrlController {
     @GetMapping("/get/{userId}")
     public ResponseEntity<APIResponse> getUrlByUserId(
             @PathVariable int userId,
-            @RequestParam(defaultValue = "0",name = "page") int page,
+            @RequestParam(defaultValue = "0", name = "page") int page,
             @RequestParam(defaultValue = "5", name = "size") int size
     ) {
         try {
@@ -95,7 +95,8 @@ public class UrlController {
     public ResponseEntity<APIResponse> deleteUrl(@PathVariable int id) {
         var response = urlService.deleteUrlById(id);
         APIResponse apiResponse;
-        if (response) apiResponse = new APIResponse(true, Constant.DATA_DELETED_SUCCESSFULLY, HttpStatus.OK.value(), null);
+        if (response)
+            apiResponse = new APIResponse(true, Constant.DATA_DELETED_SUCCESSFULLY, HttpStatus.OK.value(), null);
         else apiResponse = new APIResponse(false, Constant.FAILED_TO_DELETED, HttpStatus.OK.value(), null);
         return ResponseEntity.ok(apiResponse);
     }
@@ -107,18 +108,6 @@ public class UrlController {
         var apiResponse = new APIResponse(true, Constant.DATA_UPDATE_SUCCESS, HttpStatus.OK.value(), response);
         return ResponseEntity.ok(apiResponse);
     }
-
-//    @PostMapping(value = "/generate", produces = MediaType.IMAGE_PNG_VALUE)
-//    public ResponseEntity<byte[]> generateAndSaveQRCode(@RequestBody QRCodeRequest request) {
-//        try {
-//            byte[] qrCode = urlService.generateAndSaveQRCode(request.url(), request.title());
-//            return ResponseEntity.ok()
-//                    .contentType(MediaType.IMAGE_PNG)
-//                    .body(qrCode);
-//        } catch (Exception e) {
-//            return ResponseEntity.badRequest().build();
-//        }
-//    }
 
 
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
@@ -160,9 +149,11 @@ public class UrlController {
 
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping("/qrcode/list/{userid}")
-    public ResponseEntity<APIResponse> getQRCodeList(@PathVariable int userid) {
+    public ResponseEntity<APIResponse> getQRCodeList(@PathVariable int userid,
+                                                     @RequestParam(defaultValue = "0", name = "page") int page,
+                                                     @RequestParam(defaultValue = "5", name = "size") int size) {
         try {
-            List<QRCodeResponse> codeResponsesList = urlService.getQrCodeList(userid);
+            Page<QRCodeResponse> codeResponsesList = urlService.getQrCodeList(userid, page, size);
             APIResponse response = new APIResponse(true, Constant.DATA_FETCH_SUCCESS, HttpStatus.OK.value(), codeResponsesList);
             return ResponseEntity.ok(response);
         } catch (Exception e) {

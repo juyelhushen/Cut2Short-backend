@@ -64,6 +64,7 @@ public class SecurityConfiguration {
             "/api/user/register",
             "/oauth2/callback",
             "/oauth2/**",
+            "/v3/api-docs",
             "/api/v1/auth/**",
             "/v3/api-docs/**",
             "/v3/api-docs.yaml",
