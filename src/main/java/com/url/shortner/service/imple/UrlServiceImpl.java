@@ -49,10 +49,7 @@ public class UrlServiceImpl implements UrlService {
 
     private final UrlRepository urlRepository;
     private final UserRepository userRepository;
-    private final ModelMapper modelMapper;
     private final QRCodeRepository qrCodeRepository;
-    @PersistenceContext
-    private EntityManager entityManager;
 
 
     @Value("${app.base-url}")
@@ -314,6 +311,25 @@ public class UrlServiceImpl implements UrlService {
                 .toList();
 
         return  new PageImpl<>(filteredList, pageable, filteredList.size());
-
     }
+
+    @Override
+    @Transactional
+    public boolean deleteQrCode(long id) {
+        return qrCodeRepository.findById(id)
+                .map(qrCode -> {
+                    if (qrCode.getUrl() != null && qrCode.getUrl().getShortenUrl() == null) {
+                        Url url = qrCode.getUrl();
+                        qrCodeRepository.delete(qrCode);
+                        urlRepository.delete(url);
+                    } else {
+                        qrCodeRepository.delete(qrCode);
+                    }
+                    return true;
+                })
+                .orElse(false);
+    }
+
+
+
 }

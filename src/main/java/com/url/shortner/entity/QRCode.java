@@ -28,8 +28,9 @@ public class QRCode {
     @Column(name = "qr_code", nullable = false)
     private byte[] qrCode;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "url_id", nullable = false, unique = true)
     private Url url;
+
 
 }

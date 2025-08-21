@@ -10,7 +10,7 @@ import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Objects;
 
-public record QRCodeResponse(int id,
+public record QRCodeResponse(Long id,
                              String title,
                              String originalUrl,
                              String shortUrl,
@@ -21,7 +21,7 @@ public record QRCodeResponse(int id,
 ) {
     public QRCodeResponse(Url url) {
         this(
-                url.getId(),
+                Objects.requireNonNull(url.getQrCode()).getId(),
                 url.getTitle(),
                 url.getOriginalUrl(),
                 url.getShortenUrl(),

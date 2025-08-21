@@ -39,4 +39,6 @@ public interface UrlService {
     QRCodeRequest saveQRCode(QRCodeRequest request);
 
     Page<QRCodeResponse> getQrCodeList(int userid, int page, int size);
+
+    boolean deleteQrCode(long id);
 }
