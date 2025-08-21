@@ -10,7 +10,7 @@ import java.time.LocalDate
 @Entity
 @Table(name = "url", schema = "public", indexes = [Index(name = "shortenUrlIdx", columnList = "shortenUrl")])
 //@Cache(usage = CacheConcurrencyStrategy.READ_WRITE, region = "urlDetailsCache")
-data class  Url(
+data class Url(
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "url_seq")

@@ -97,7 +97,7 @@ public class UrlController {
         APIResponse apiResponse;
         if (response)
             apiResponse = new APIResponse(true, Constant.DATA_DELETED_SUCCESSFULLY, HttpStatus.OK.value(), null);
-        else apiResponse = new APIResponse(false, Constant.FAILED_TO_DELETED, HttpStatus.OK.value(), null);
+        else apiResponse = new APIResponse(false, Constant.FAILED_TO_DELETE, HttpStatus.OK.value(), null);
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -159,5 +159,14 @@ public class UrlController {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+    @DeleteMapping("/qrcode/delete/{id}")
+    public ResponseEntity<APIResponse> deleteQRCode(@PathVariable long id) {
+        boolean isDeleted = urlService.deleteQrCode(id);
+        String msg = isDeleted ? Constant.DATA_DELETED_SUCCESSFULLY : Constant.FAILED_TO_DELETE;
+        var response = new APIResponse(isDeleted, msg, HttpStatus.OK.value(), isDeleted);
+        return ResponseEntity.ok(response);
     }
 }
