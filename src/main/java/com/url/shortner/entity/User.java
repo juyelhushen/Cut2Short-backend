@@ -30,6 +30,10 @@ public class User extends Auditable {
 
     private String imageUrl;
 
+    @Lob
+    @Column(name = "profile_pic")
+    private byte[] image;
+
 
 //    @NotNull
 //    @Email(message = "please enter correct email", regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")

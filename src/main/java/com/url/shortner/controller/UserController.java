@@ -95,4 +95,11 @@ public class UserController {
         response.addCookie(cookie);
         return ResponseEntity.ok("Logged out");
     }
+
+    @GetMapping("/profile/info")
+    public ResponseEntity<APIResponse> profileInfo(@CookieValue(name = "AUTH-TOKEN", required = false) String token) {
+        var profileInfo = userService.fetchUserProfileInfo(token);
+        APIResponse apiResponse = new APIResponse(true, Constant.DATA_FETCH_SUCCESS, HttpStatus.OK.value(), profileInfo);
+        return ResponseEntity.ok(apiResponse);
+    }
 }
