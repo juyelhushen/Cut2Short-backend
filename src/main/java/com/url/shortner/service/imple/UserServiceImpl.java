@@ -9,6 +9,7 @@ import com.url.shortner.security.JwtUtils;
 import com.url.shortner.security.cookie.CookieService;
 import com.url.shortner.service.UserService;
 import com.url.shortner.wrapper.AuthResponse;
+import com.url.shortner.wrapper.ProfileResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -109,6 +110,16 @@ public class UserServiceImpl implements UserService {
                 .password(passwordEncoder.encode(userRequest.password()))
                 .role(Role.USER)
                 .build();
+    }
+
+
+    @Override
+    public ProfileResponse fetchUserProfileInfo(String token) {
+        var username = jwtUtils.extractUsername(token);
+        return userRepository
+                .findByEmail(username)
+                .map(ProfileResponse::new)
+                .orElse(null);
     }
 
     private User findByUsername(String username) {
