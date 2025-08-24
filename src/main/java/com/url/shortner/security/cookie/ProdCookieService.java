@@ -15,8 +15,7 @@ public class ProdCookieService implements CookieService {
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
-                .domain("cut2short.render.com")
-                .path("/")
+                .domain(".onrender.com")
                 .maxAge(Duration.ofDays(7))
                 .build();
     }
