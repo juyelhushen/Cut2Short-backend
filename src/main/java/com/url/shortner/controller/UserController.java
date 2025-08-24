@@ -2,6 +2,7 @@ package com.url.shortner.controller;
 
 import com.url.shortner.entity.User;
 import com.url.shortner.payload.UserRequest;
+import com.url.shortner.payload.UserUpdateRequest;
 import com.url.shortner.repository.UserRepository;
 import com.url.shortner.security.JwtUtils;
 import com.url.shortner.security.cookie.CookieService;
@@ -19,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -48,7 +50,7 @@ public class UserController {
         APIResponse apiResponse = new APIResponse(
                 true,
                 "Registration successful",
-                HttpStatus.OK.value(),response
+                HttpStatus.OK.value(), response
         );
 
         return ResponseEntity.ok(apiResponse);
@@ -102,4 +104,14 @@ public class UserController {
         APIResponse apiResponse = new APIResponse(true, Constant.DATA_FETCH_SUCCESS, HttpStatus.OK.value(), profileInfo);
         return ResponseEntity.ok(apiResponse);
     }
+
+    @PreAuthorize("hasRole('USER')")
+    @PatchMapping("/profile/update")
+    public ResponseEntity<APIResponse> updateProfile(@RequestBody UserUpdateRequest request, @CookieValue(name = "AUTH-TOKEN", required = false) String token) {
+        boolean updated = userService.updateProfile(request, token);
+        String message = updated ? "Profile updated successfully" : "Profile update failed";
+        APIResponse apiResponse = new APIResponse(updated, message, HttpStatus.OK.value(), updated);
+        return ResponseEntity.ok(apiResponse);
+    }
+
 }

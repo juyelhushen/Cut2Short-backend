@@ -2,7 +2,9 @@ package com.url.shortner.service.imple;
 
 import com.url.shortner.entity.Role;
 import com.url.shortner.entity.User;
+import com.url.shortner.mapper.UserMapper;
 import com.url.shortner.payload.UserRequest;
+import com.url.shortner.payload.UserUpdateRequest;
 import com.url.shortner.repository.UserRepository;
 import com.url.shortner.security.AuthFilter;
 import com.url.shortner.security.JwtUtils;
@@ -27,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -41,6 +44,7 @@ public class UserServiceImpl implements UserService {
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
     private final CookieService cookieService;
+    private final UserMapper userMapper;
 
     @Override
     public AuthResponse register(UserRequest request) {
@@ -91,10 +95,8 @@ public class UserServiceImpl implements UserService {
                     ResponseCookie cookie = cookieService.createCookie(token);
                     httpResponse.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
                 }
-
                 return new AuthResponse(user.getId(), user.getFullName(), user.getEmail(), user.getImageUrl(), user.getRole());
             }
-
             return null;
 
         } catch (BadCredentialsException e) {
@@ -122,8 +124,22 @@ public class UserServiceImpl implements UserService {
                 .orElse(null);
     }
 
+    @Override
+    public boolean updateProfile(UserUpdateRequest request, String token) {
+        var username = jwtUtils.extractUsername(token);
+        return userRepository.findByEmail(username)
+                .map(user -> {
+                    userMapper.updateUserFromRequest(request, user);
+                    userRepository.save(user);
+                    return true;
+                })
+                .orElse(false);
+    }
+
     private User findByUsername(String username) {
-        return userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException(username));
+        return userRepository
+                .findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
     }
 
 
