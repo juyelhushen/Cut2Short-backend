@@ -31,6 +31,4 @@ public class QRCode {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "url_id", nullable = false, unique = true)
     private Url url;
-
-
 }
