@@ -5,15 +5,14 @@ spring:
     password: postgres
     driver-class-name: org.postgresql.Driver
 
-
 cors:
   url: http://localhost:3000
-
-#callback:
-#  url: http://localhost:3000/oauth2/callback
 
 callback:
   url: http://localhost:3000/dashboard
 
 app:
   base-url: http://localhost:8080/c2s/
+  cookie:
+    secure: false
+    same-site: Lax
