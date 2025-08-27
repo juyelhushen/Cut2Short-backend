@@ -3,6 +3,7 @@ package com.url.shortner.config;
 import com.url.shortner.security.AuthEntryPoint;
 import com.url.shortner.security.AuthFilter;
 import com.url.shortner.security.user.CustomOAuth2UserService;
+import com.url.shortner.security.user.OAuth2LoginSuccessHandler;
 import com.url.shortner.security.user.UserDetailServiceImpl;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -54,6 +55,7 @@ public class SecurityConfiguration {
     private final UserDetailServiceImpl userDetailService;
     private final AuthEntryPoint authEntryPoint;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
 
     public static final String[] PUBLIC_ENDPOINTS = {
@@ -76,33 +78,26 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-                .cors(httpSecurityCorsConfigurer ->
-                        httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(request ->
-                        request
-                                .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                                .anyRequest().authenticated()
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authEntryPoint))
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::migrateSession)
-                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                        .defaultSuccessUrl(callbackUrl, true)
-//                                .successHandler((request, response, authentication) -> {
-//                                    response.sendRedirect(callbackUrl);
-//                                })
-                        .failureHandler((request, response, exception) -> {
-                            log.error("OAuth2 login failed: {}", exception.getMessage());
-                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "OAuth2 login failed");
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler((request, response, ex) -> {
+                            log.error("OAuth2 login failed: {}", ex.getMessage());
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                         })
                 )
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
+
 
     @Bean
     public PasswordEncoder encoder() {
@@ -127,7 +122,7 @@ public class SecurityConfiguration {
         configuration.setAllowedOrigins(List.of("https://cut2short-front.onrender.com"));
         configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS","PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true); // MUST be true
+        configuration.setAllowCredentials(true); // critical for cookies
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
