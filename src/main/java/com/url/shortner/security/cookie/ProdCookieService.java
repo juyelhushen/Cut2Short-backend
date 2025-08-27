@@ -15,7 +15,7 @@ public class ProdCookieService implements CookieService {
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
-                .domain("onrender.com")  // REQUIRED for cross-subdomain cookies
+                .domain("onrender.com")   // important for cross-subdomain
                 .path("/")
                 .maxAge(Duration.ofDays(7))
                 .build();

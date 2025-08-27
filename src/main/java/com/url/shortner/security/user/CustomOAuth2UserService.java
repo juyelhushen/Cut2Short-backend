@@ -34,8 +34,6 @@ import java.util.Objects;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
-    private final JwtUtils jwtUtils;
-    private final CookieService cookieService;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -47,67 +45,38 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String oauth2Id;
 
         if ("github".equals(provider)) {
-            if (email == null) {
-                email = oAuth2User.getAttribute("login") + "@github.com";
-            }
+            if (email == null) email = oAuth2User.getAttribute("login") + "@github.com";
             oauth2Id = "github_" + oAuth2User.getAttribute("id");
-        } else { // google
+        } else {
             oauth2Id = "google_" + oAuth2User.getAttribute("sub");
         }
 
-        String imageUrl = oAuth2User.getAttribute("picture");
         String name = oAuth2User.getAttribute("name");
-        String finalEmail = email;
+        String[] names = name != null ? name.split(" ") : new String[]{"Unknown"};
 
+        String finalEmail = email;
         User user = userRepository.findByOauth2Id(oauth2Id)
                 .orElseGet(() -> userRepository.findByEmail(finalEmail)
                         .orElseGet(() -> {
-                            String[] names = name != null ? name.split(" ") : new String[]{"Unknown"};
                             User newUser = User.builder()
                                     .firstName(names[0])
                                     .lastName(names.length > 1 ? names[1] : null)
                                     .email(finalEmail)
                                     .role(Role.USER)
-                                    .imageUrl(imageUrl)
                                     .oauth2Id(oauth2Id)
                                     .build();
-                            User savedUser = userRepository.save(newUser);
-                            log.info("Created new user: id={}, email={}", savedUser.getId(), finalEmail);
-                            return savedUser;
+                            User saved = userRepository.save(newUser);
+                            log.info("Created new user: id={}, email={}", saved.getId(), finalEmail);
+                            return saved;
                         }));
 
-        var token = jwtUtils.generateFromOAuth2User(user.getEmail(), user.getRole());
-
-        // Set cookie using environment-specific implementation
-        HttpServletResponse response = ((ServletRequestAttributes) Objects.requireNonNull(RequestContextHolder.getRequestAttributes()))
-                .getResponse();
-        if (response != null) {
-            ResponseCookie cookie = cookieService.createCookie(token);
-            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-        }
-
         Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
-        attributes.put("token", token);
         attributes.put("userId", user.getId());
-        attributes.put("profile", imageUrl);
 
-        String principalAttribute = "email";
-
-        OAuth2User customUser = new DefaultOAuth2User(
+        return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())),
                 attributes,
-                principalAttribute
+                "email"
         );
-
-        SecurityContextHolder.getContext().setAuthentication(
-                new OAuth2AuthenticationToken(
-                        customUser,
-                        customUser.getAuthorities(),
-                        provider
-                )
-        );
-
-        log.info("SecurityContextHolder set with user: id={}, email={}", user.getId(), finalEmail);
-        return customUser;
     }
 }
