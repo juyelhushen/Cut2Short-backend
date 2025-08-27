@@ -12,11 +12,11 @@ server:
 cors:
   url: https://cut2short-front.onrender.com
 
-#callback:
-#  url: https://cut2short-front.onrender.com/oauth2/callback
-
 callback:
   url: https://cut2short-front.onrender.com/dashboard
 
 app:
   base-url: https://cut2short-backend.onrender.com/c2s/
+  cookie:
+    secure: true
+    same-site: None
