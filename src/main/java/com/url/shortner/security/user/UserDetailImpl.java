@@ -39,11 +39,12 @@ public class UserDetailImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-//        Set<GrantedAuthority> authorities = new HashSet<>();
-//        authorities.add(new SimpleGrantedAuthority(user.getRole().name()));
-//        return authorities;
-        return Set.of(new SimpleGrantedAuthority(user.getRole().name()));
-//        return List.of(new SimpleGrantedAuthority(user.getRole().name()));
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        user.getPermissions().forEach(permission ->
+                authorities.add(new SimpleGrantedAuthority(permission.getName()))
+        );
+        return authorities;
     }
 
     @Override
