@@ -86,6 +86,7 @@ public class AuthFilter extends OncePerRequestFilter {
                 }
             } catch (Exception e) {
                 log.error("Error loading UserDetails: {}", e.getMessage(), e);
+                SecurityContextHolder.clearContext();
             }
         }
 

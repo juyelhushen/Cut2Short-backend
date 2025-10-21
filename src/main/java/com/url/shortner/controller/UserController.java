@@ -1,7 +1,10 @@
 package com.url.shortner.controller;
 
+import com.url.shortner.entity.Role;
 import com.url.shortner.entity.User;
+import com.url.shortner.exception.ResourceNotFound;
 import com.url.shortner.payload.UserRequest;
+import com.url.shortner.payload.UserResponse;
 import com.url.shortner.payload.UserUpdateRequest;
 import com.url.shortner.repository.UserRepository;
 import com.url.shortner.security.JwtUtils;
@@ -31,6 +34,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -79,20 +83,54 @@ public class UserController {
         return ResponseEntity.ok(apiResponse);
     }
 
+//    @GetMapping("/me")
+//    public ResponseEntity<?> me(@CookieValue(name = "AUTH-TOKEN", required = false) String token) {
+//        if (token == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No auth token");
+//
+//        String email = jwtUtils.extractUsername(token);
+//        User user = userRepository.findByEmail(email).orElseThrow();
+//        return ResponseEntity.ok(Map.of(
+//                "userId", user.getId(),
+//                "email", user.getEmail(),
+//                "name", user.getFirstName() + " " + user.getLastName(),
+//                "profile", user.getImageUrl(),
+//                "role", user.getRole()
+//        ));
+//    }
+
     @GetMapping("/me")
     public ResponseEntity<?> me(@CookieValue(name = "AUTH-TOKEN", required = false) String token) {
-        if (token == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No auth token");
+        if (token == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No auth token");
+        }
 
         String email = jwtUtils.extractUsername(token);
-        User user = userRepository.findByEmail(email).orElseThrow();
-        return ResponseEntity.ok(Map.of(
-                "userId", user.getId(),
-                "email", user.getEmail(),
-                "name", user.getFirstName() + " " + user.getLastName(),
-                "profile", user.getImageUrl(),
-                "role", user.getRole()
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFound("No user found with email: " + email));
+
+        String fullName = Optional.ofNullable(user.getFirstName()).orElse("")
+                .concat(" ")
+                .concat(Optional.ofNullable(user.getLastName()).orElse(""))
+                .trim();
+        if (fullName.isBlank()) {
+            fullName = email.substring(0, email.indexOf("@")); // fallback
+        }
+
+        String profile = Optional.ofNullable(user.getImageUrl())
+//                .or(() -> Optional.ofNullable(user.getProfilePic())) // support both fields
+                .orElse("");
+
+        String role = String.valueOf(Optional.ofNullable(user.getRole()).orElse(Role.valueOf(Role.USER.toString())));
+
+        return ResponseEntity.ok(new UserResponse(
+                user.getId(),
+                email,
+                fullName,
+                profile,
+                role
         ));
     }
+
 
 
     @PostMapping("/logout")

@@ -6,6 +6,7 @@ import com.url.shortner.security.cookie.CookieService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
@@ -18,6 +19,12 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
+
+    @Value("${callback.url}")
+    private String callbackUrl;
+
+    @Value("${cors.url}")
+    private String corsUrl;
 
     private final CookieService cookieService;
     private final JwtUtils jwtUtils;
@@ -35,6 +42,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         ResponseCookie cookie = cookieService.createCookie(token);
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        response.sendRedirect("https://cut2short-front.onrender.com/dashboard");
+        response.sendRedirect(callbackUrl);
     }
 }

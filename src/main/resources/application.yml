@@ -108,3 +108,9 @@ jwt:
 #Secret Key
 #Secret:
 #  key: fkgnkvbkdfgrthgsfvfghjgnfdhguigndfjvkndffdkngdfkj
+
+springdoc:
+  swagger-ui:
+    display-request-duration: true
+    try-it-out-enabled: true
+    with-credentials: true
