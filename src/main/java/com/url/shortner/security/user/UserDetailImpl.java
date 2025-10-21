@@ -41,9 +41,9 @@ public class UserDetailImpl implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Set<GrantedAuthority> authorities = new HashSet<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
-        user.getPermissions().forEach(permission ->
-                authorities.add(new SimpleGrantedAuthority(permission.getName()))
-        );
+//        user.getPermissions().forEach(permission ->
+//                authorities.add(new SimpleGrantedAuthority(permission.getName()))
+//        );
         return authorities;
     }
 
